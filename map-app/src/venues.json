@@ -57,7 +57,7 @@
     },
     {
         "Venue name": "EBC - Morris House",
-        "Site address": "120 Exhibition St",
+        "Site address": "120 Exhibition St, Melbourne VIC 3000",
         "Quote No": 23316,
         "Date": "26/02/2026",
         "Sub Total": 11571.52,
@@ -65,7 +65,7 @@
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
         "Freight to site (...)": "x",
-        "State": "Unknown",
+        "State": "VIC",
         "lat": -37.812902,
         "lng": 144.9712356,
         "is_hq": false
@@ -507,7 +507,7 @@
     },
     {
         "Venue name": "GSH - Garden State Hotel",
-        "Site address": "101 Flinders Ln",
+        "Site address": "101 Flinders Ln, Melbourne VIC 3000",
         "Quote No": 23317,
         "Date": "26/02/2026",
         "Sub Total": 8834.05,
@@ -515,7 +515,7 @@
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
         "Freight to site (...)": "x",
-        "State": "Unknown",
+        "State": "VIC",
         "lat": -37.8153755,
         "lng": 144.971045,
         "is_hq": false
@@ -552,7 +552,7 @@
     },
     {
         "Venue name": "JVLMH - Lefty\u2019s Music Hall",
-        "Site address": "15 Caxton St, Petrie Terrace, VIC 4000",
+        "Site address": "15 Caxton St, Petrie Terrace, QLD 4000",
         "Quote No": 23220,
         "Date": "23 September",
         "Sub Total": 22541.05,
@@ -560,7 +560,7 @@
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": null,
         "Freight to site (...)": "x",
-        "State": "VIC",
+        "State": "QLD",
         "lat": -27.464469,
         "lng": 153.013087,
         "is_hq": false

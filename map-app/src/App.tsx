@@ -2,12 +2,15 @@ import { useState, useMemo } from 'react';
 
 import Sidebar from './components/Sidebar';
 import MapView from './components/MapView';
+import QuoteBundle from './components/QuoteBundle';
 import venuesData from './venues.json';
 import type { Venue } from './types';
 
 function App() {
   const [selectedState, setSelectedState] = useState<string>('All');
   const [selectedVenues, setSelectedVenues] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<'map' | 'bundle'>('map');
+  const [discount, setDiscount] = useState<number>(0);
 
   const venues: Venue[] = venuesData as Venue[];
 
@@ -49,22 +52,54 @@ function App() {
 
   return (
     <div className="app-container">
-      <Sidebar
-        venues={filteredVenues}
-        states={uniqueStates}
-        selectedState={selectedState}
-        onStateChange={setSelectedState}
-        selectedVenues={selectedVenues}
-        onVenueToggle={handleVenueToggle}
-        onToggleAll={handleToggleAll}
-      />
-      <main className="map-container">
-        <MapView
-          venues={filteredVenues}
-          selectedVenues={selectedVenues}
-          onVenueToggle={handleVenueToggle}
-        />
-      </main>
+      <header className="app-header">
+        <h1>Venue Quotation Map</h1>
+        <div className="tab-navigation">
+          <button
+            className={`tab-btn ${activeTab === 'map' ? 'active' : ''}`}
+            onClick={() => setActiveTab('map')}
+          >
+            Map View
+          </button>
+          <button
+            className={`tab-btn ${activeTab === 'bundle' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bundle')}
+          >
+            Quote Bundle ({selectedVenues.size})
+          </button>
+        </div>
+      </header>
+
+      {activeTab === 'map' ? (
+        <div className="main-content">
+          <Sidebar
+            venues={filteredVenues}
+            states={uniqueStates}
+            selectedState={selectedState}
+            onStateChange={setSelectedState}
+            selectedVenues={selectedVenues}
+            onVenueToggle={handleVenueToggle}
+            onToggleAll={handleToggleAll}
+          />
+          <main className="map-container">
+            <MapView
+              venues={filteredVenues}
+              selectedVenues={selectedVenues}
+              onVenueToggle={handleVenueToggle}
+            />
+          </main>
+        </div>
+      ) : (
+        <div className="main-content bundle-view">
+          <QuoteBundle
+            venues={venues}
+            selectedVenues={selectedVenues}
+            onRemoveVenue={handleVenueToggle}
+            discount={discount}
+            onDiscountChange={setDiscount}
+          />
+        </div>
+      )}
     </div>
   );
 }

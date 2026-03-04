@@ -9,4 +9,5 @@ export interface Venue {
     "lat": number | null;
     "lng": number | null;
     "is_hq": boolean;
+    "pdf_filename"?: string;
 }

@@ -7,9 +7,7 @@ import type { Venue } from './types';
 
 function App() {
   const [selectedState, setSelectedState] = useState<string>('All');
-  const [selectedVenues, setSelectedVenues] = useState<Set<string>>(() => {
-    return new Set((venuesData as Venue[]).map(v => v['Venue name']));
-  });
+  const [selectedVenues, setSelectedVenues] = useState<Set<string>>(new Set());
 
   const venues: Venue[] = venuesData as Venue[];
 

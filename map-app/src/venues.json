@@ -23,14 +23,15 @@
         "State": "VIC",
         "lat": -37.8640582,
         "lng": 144.973013,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23340 ESP Hotel Esplanade.pdf"
     },
     {
         "Venue name": "JVOLD - Old Bundy Tavern",
         "Site address": "20 Quay St, Bundaberg, QLD 4101",
         "Quote No": 23330,
         "Date": "27/02/2026",
-        "Sub Total": 17320.0,
+        "Sub Total": 17320,
         "Scope brief": "5 ladders, 3m of walkway, 10m of guardrail, 1 anchor",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -38,14 +39,15 @@
         "State": "QLD",
         "lat": -24.8640408,
         "lng": 152.3526016,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23330 JVOLD Old Bundy Tavern.pdf"
     },
     {
         "Venue name": "FAR - Fargo & Co",
         "Site address": "216 Swan St, Richmond, VIC 3121",
         "Quote No": 23257,
         "Date": "11 November",
-        "Sub Total": 18658.0,
+        "Sub Total": 18658,
         "Scope brief": "4 ladders, 1m of walkway, 5m of guardrail",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -53,7 +55,8 @@
         "State": "VIC",
         "lat": -37.8257283,
         "lng": 144.9967894,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23257 FARFargo & Co.pdf"
     },
     {
         "Venue name": "EBC - Morris House",
@@ -68,7 +71,8 @@
         "State": "VIC",
         "lat": -37.812902,
         "lng": 144.9712356,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23316 EBC Morris House.pdf"
     },
     {
         "Venue name": "PER - Perseverance Hotel",
@@ -83,7 +87,8 @@
         "State": "VIC",
         "lat": -37.8014757,
         "lng": 144.9781707,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23157 PER Perserverance Hotel.pdf"
     },
     {
         "Venue name": "GLD - Golden Gate Hotel",
@@ -98,7 +103,8 @@
         "State": "VIC",
         "lat": -37.831777,
         "lng": 144.959768,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23329 GLD Golden Gate Hotel.pdf"
     },
     {
         "Venue name": "JVSPR Spring Lake Hotel",
@@ -113,7 +119,8 @@
         "State": "QLD",
         "lat": -27.6792843,
         "lng": 152.9101582,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23353 JVSPR Spring Lake Hotel.pdf"
     },
     {
         "Venue name": "VBL - Village Belle Hotel",
@@ -128,14 +135,15 @@
         "State": "VIC",
         "lat": -37.8695376,
         "lng": 144.9809763,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23338 VBL Village Belle.pdf"
     },
     {
         "Venue name": "REE - Reef Gateway",
         "Site address": "38 Shute Harbour Road, Cannonvale, QLD 4802",
         "Quote No": 23333,
         "Date": "27/02/2026",
-        "Sub Total": 10694.0,
+        "Sub Total": 10694,
         "Scope brief": "20m of guardrail",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -143,14 +151,15 @@
         "State": "QLD",
         "lat": -20.2906361,
         "lng": 148.6765761,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23333 REE Reef Gateway Hotel.pdf"
     },
     {
         "Venue name": "JVPAL - Palm Cove Tavern",
         "Site address": "24 Vievers Road, Palm Cove, QLD QLD",
         "Quote No": 23326,
         "Date": "27/02/2026",
-        "Sub Total": 10431.0,
+        "Sub Total": 10431,
         "Scope brief": "20 anchors",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -158,7 +167,8 @@
         "State": "QLD",
         "lat": -16.745425,
         "lng": 145.666986,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23326 JVPAL Palm Cove Tavern.pdf"
     },
     {
         "Venue name": "THA - Terminus Hotel Abbotsford",
@@ -173,7 +183,8 @@
         "State": "VIC",
         "lat": -37.8109749,
         "lng": 145.0072652,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23159 THA Terminus Hotel Abbotsford.pdf"
     },
     {
         "Venue name": "GSG - Brewdog Perth",
@@ -188,7 +199,8 @@
         "State": "WA",
         "lat": -31.9483042,
         "lng": 115.8472714,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23253 GSG BrewDog Perth.pdf"
     },
     {
         "Venue name": "CLA - Claremont Hotel",
@@ -203,7 +215,8 @@
         "State": "WA",
         "lat": -31.9815138,
         "lng": 115.7809485,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23252 CLAClaremont Hotel.pdf"
     },
     {
         "Venue name": "MID - Middle Park Hotel",
@@ -218,7 +231,8 @@
         "State": "VIC",
         "lat": -37.8499816,
         "lng": 144.965054,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23323 MID Middle Park Hotel.pdf"
     },
     {
         "Venue name": "HAW - Hawthorn Hotel",
@@ -233,7 +247,8 @@
         "State": "VIC",
         "lat": -37.8204578,
         "lng": 145.0176247,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23334 HAW Hawthorn Hotel.pdf"
     },
     {
         "Venue name": "BIR - Biralle Tavern",
@@ -248,7 +263,8 @@
         "State": "VIC",
         "lat": -36.1273781,
         "lng": 146.8658612,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23200 BIR Biralle Tavern.pdf"
     },
     {
         "Venue name": "EUR - Eureka Hotel",
@@ -263,7 +279,8 @@
         "State": "VIC",
         "lat": -38.1483489,
         "lng": 144.3594539,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23322 EUR Eureka Hotel.pdf"
     },
     {
         "Venue name": "JVWCH Club Waterford Hotel",
@@ -278,7 +295,8 @@
         "State": "QLD",
         "lat": -27.688846,
         "lng": 153.15174,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23347 JVWCH Club Waterford Hotel.pdf"
     },
     {
         "Venue name": "VIC-Victoria Hotel Yarraville",
@@ -293,7 +311,8 @@
         "State": "VIC",
         "lat": -37.816927,
         "lng": 144.8963502,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23250 VICVictorian hotel Yarraville.pdf"
     },
     {
         "Venue name": "PRI Prince F Wales Hotel",
@@ -308,7 +327,8 @@
         "State": "VIC",
         "lat": -37.8621338,
         "lng": 144.9740773,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23339 PRI Prince of Wales.pdf"
     },
     {
         "Venue name": "ALB - Albion Hotel",
@@ -323,7 +343,8 @@
         "State": "NSW",
         "lat": -36.0807685,
         "lng": 146.9145714,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23202 ALB Albion Hotel.pdf"
     },
     {
         "Venue name": "PHT - Prahran Hotel",
@@ -338,14 +359,15 @@
         "State": "VIC",
         "lat": -37.8520645,
         "lng": 144.9949186,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23331 PHT Prahran Hotel.pdf"
     },
     {
         "Venue name": "JVROY Royal Nundah",
         "Site address": "1259 Sandgate Rd, Nundah, QLD 4012",
         "Quote No": 23352,
         "Date": "04/03/2026",
-        "Sub Total": 6802.0,
+        "Sub Total": 6802,
         "Scope brief": "1 anchor",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -353,7 +375,8 @@
         "State": "QLD",
         "lat": -27.4020463,
         "lng": 153.0603156,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23352 JVROY Royal Nundah.pdf"
     },
     {
         "Venue name": "TEL Telegraph Hotel",
@@ -368,7 +391,8 @@
         "State": "TAS",
         "lat": -42.8841582,
         "lng": 147.3313463,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23355 TEL Telegraph Hotel.pdf"
     },
     {
         "Venue name": "GUI Guildford Hotel",
@@ -383,14 +407,15 @@
         "State": "WA",
         "lat": -31.8996609,
         "lng": 115.968542,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23342 GUI Guildford.pdf"
     },
     {
         "Venue name": "PEN - Brewdog Penridge",
         "Site address": "2 Anglers Way, Maribyrnong, VIC 3032",
         "Quote No": 23335,
         "Date": "02/03/2026",
-        "Sub Total": 5906.0,
+        "Sub Total": 5906,
         "Scope brief": "1m of guardrail",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -398,14 +423,15 @@
         "State": "VIC",
         "lat": -37.7693415,
         "lng": 144.9012128,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23335 PEN Brewdog Penridge.pdf"
     },
     {
-        "Venue name": "JVFWH Fitzy\u2019s Waterford",
+        "Venue name": "JVFWH Fitzy’s Waterford",
         "Site address": "3-34 Albert Street, Waterford, QLD 4133",
         "Quote No": 23314,
         "Date": "26/02/2026",
-        "Sub Total": 5349.0,
+        "Sub Total": 5349,
         "Scope brief": "10m of guardrail",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -413,7 +439,8 @@
         "State": "QLD",
         "lat": -27.6940789,
         "lng": 153.1467796,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23314 JVFWH Fitzys Waterford.pdf"
     },
     {
         "Venue name": "BDA - Beer Deluxe Albury",
@@ -428,14 +455,15 @@
         "State": "NSW",
         "lat": -36.0817708,
         "lng": 146.9154756,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23201 BDA Beer Delux Albury.pdf"
     },
     {
         "Venue name": "WIN - The Winery",
         "Site address": "285A Crown St, Surry Hills, NSW 2010",
         "Quote No": 23222,
         "Date": "23 September",
-        "Sub Total": 32566.0,
+        "Sub Total": 32566,
         "Scope brief": "3 ladders, 14m of guardrail",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -443,7 +471,8 @@
         "State": "NSW",
         "lat": -33.8814624,
         "lng": 151.214579,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23222 WIN The Winery.pdf"
     },
     {
         "Venue name": "STU - Studley Park Boathouse",
@@ -458,14 +487,15 @@
         "State": "VIC",
         "lat": -37.8012839,
         "lng": 145.0077075,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23161 STU Studley Park Boathouse.pdf"
     },
     {
         "Venue name": "JVBRH - Barron River Hotel",
         "Site address": "360 Stratford Street, Strathford, QLD 4870",
         "Quote No": 23328,
         "Date": "27/02/2026",
-        "Sub Total": 7137.0,
+        "Sub Total": 7137,
         "Scope brief": "1 anchor",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": null,
@@ -473,7 +503,8 @@
         "State": "QLD",
         "lat": -16.8906,
         "lng": 145.727918,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23328 JVBRH Barron river Hotel.pdf"
     },
     {
         "Venue name": "THT - The Terminus Yarrawonga",
@@ -488,7 +519,8 @@
         "State": "VIC",
         "lat": -36.0125617,
         "lng": 146.0041677,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23199THT Terminus Yarrawonga.pdf"
     },
     {
         "Venue name": "WBR Woodbridge Hotel",
@@ -503,7 +535,8 @@
         "State": "WA",
         "lat": -31.8975341,
         "lng": 115.9823253,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23341 WBR Woodbridge Hotel.pdf"
     },
     {
         "Venue name": "GSH - Garden State Hotel",
@@ -518,14 +551,15 @@
         "State": "VIC",
         "lat": -37.8153755,
         "lng": 144.971045,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23317 GSH Garden State Hotel.pdf"
     },
     {
         "Venue name": "JVOXL Oxley Hotel",
         "Site address": "Cnr Ipswich &, Oxley Rd, Oxley, QLD 4075",
         "Quote No": 23351,
         "Date": "04/03/2026",
-        "Sub Total": 12634.0,
+        "Sub Total": 12634,
         "Scope brief": "3 ladders, 24m of guardrail",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -533,7 +567,8 @@
         "State": "QLD",
         "lat": -27.561285,
         "lng": 152.977457,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23351 JVOXL Oxley Hotel.pdf"
     },
     {
         "Venue name": "LOC - The Local",
@@ -548,10 +583,11 @@
         "State": "VIC",
         "lat": -37.8427349,
         "lng": 144.9388838,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23265 LOCThe Local.pdf"
     },
     {
-        "Venue name": "JVLMH - Lefty\u2019s Music Hall",
+        "Venue name": "JVLMH - Lefty’s Music Hall",
         "Site address": "15 Caxton St, Petrie Terrace, QLD 4000",
         "Quote No": 23220,
         "Date": "23 September",
@@ -563,7 +599,8 @@
         "State": "QLD",
         "lat": -27.464469,
         "lng": 153.013087,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23220 JVLMH Leftys Music Hall.pdf"
     },
     {
         "Venue name": "YVG - Yarra Valley Grand Hotel",
@@ -578,7 +615,8 @@
         "State": "VIC",
         "lat": -37.6549727,
         "lng": 145.3753826,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23198 YVG Yarra valley Grand.pdf"
     },
     {
         "Venue name": "MON - Monsoons",
@@ -593,7 +631,8 @@
         "State": "NT",
         "lat": -12.4632989,
         "lng": 130.8404935,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23321 MOM Monsoons.pdf"
     },
     {
         "Venue name": "SDH - Skinny Dog Hotel",
@@ -608,7 +647,8 @@
         "State": "VIC",
         "lat": -37.8067614,
         "lng": 145.0304486,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23160 SDH Skinny Dog Hotel.pdf"
     },
     {
         "Venue name": "ANG - Anglers Tavern",
@@ -623,7 +663,8 @@
         "State": "VIC",
         "lat": -37.7693415,
         "lng": 144.9012128,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23336 ANG Anglers Tavern.pdf"
     },
     {
         "Venue name": "STR Strand Hotel",
@@ -638,7 +679,8 @@
         "State": "QLD",
         "lat": -23.1296425,
         "lng": 150.7489269,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23354 STR Strand Hotel.pdf"
     },
     {
         "Venue name": "COB Cobblers Tavern",
@@ -653,7 +695,8 @@
         "State": "WA",
         "lat": -32.5797601,
         "lng": 115.6632442,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23346 COB Cobblers Tavern.pdf"
     },
     {
         "Venue name": "COU The Court",
@@ -668,7 +711,8 @@
         "State": "WA",
         "lat": -31.950252,
         "lng": 115.8624819,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23344 COU The Court.pdf"
     },
     {
         "Venue name": "JVMET Metropolitan Hotel",
@@ -683,7 +727,8 @@
         "State": "QLD",
         "lat": -21.1428993,
         "lng": 149.1825165,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23350 JVMET Metropolitan Hotel.pdf"
     },
     {
         "Venue name": "JVDIA - Diamonds Tavern",
@@ -698,7 +743,8 @@
         "State": "QLD",
         "lat": -28.083511,
         "lng": 153.40803,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23324 JVDIA Diamonds Tavern.pdf"
     },
     {
         "Venue name": "JVGRA - Grafton Hotel",
@@ -713,7 +759,8 @@
         "State": "QLD",
         "lat": -17.0242016,
         "lng": 145.7467479,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23325 JVGRA Grafton Hotel.pdf"
     },
     {
         "Venue name": "GPH - Auburn Hotel",
@@ -728,7 +775,8 @@
         "State": "VIC",
         "lat": -37.8159401,
         "lng": 145.0463162,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23255 GPH Auburn Hotel.pdf"
     },
     {
         "Venue name": "FLI - Flinders Hotel",
@@ -743,14 +791,15 @@
         "State": "VIC",
         "lat": -38.4744815,
         "lng": 145.019836,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23319 FLI Flinders Hotel.pdf"
     },
     {
         "Venue name": "RCH - Richmond Club Hotel",
         "Site address": "100 Swan St, Richmond, VIC 3121",
         "Quote No": 23263,
         "Date": "13 November",
-        "Sub Total": 5800.0,
+        "Sub Total": 5800,
         "Scope brief": "See details in PDF",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -758,7 +807,8 @@
         "State": "VIC",
         "lat": -37.8252755,
         "lng": 144.9933114,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23263RCH Richmond Hotel.pdf"
     },
     {
         "Venue name": "SWA - Swan Hotel",
@@ -773,7 +823,8 @@
         "State": "VIC",
         "lat": -37.8341639,
         "lng": 144.9966058,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23262 SWASwan Hotel.pdf"
     },
     {
         "Venue name": "JVWST Waterloo Station Hotel",
@@ -788,7 +839,8 @@
         "State": "SA",
         "lat": -34.74493,
         "lng": 138.6130324,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23356 JVWST Waterloo Station Hotel.pdf"
     },
     {
         "Venue name": "PAL - Prince Alfred",
@@ -803,7 +855,8 @@
         "State": "VIC",
         "lat": -37.8324893,
         "lng": 144.9969834,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23259 PALPrince Alfred.pdf"
     },
     {
         "Venue name": "STN - Station Hotel",
@@ -818,7 +871,8 @@
         "State": "VIC",
         "lat": -37.8045679,
         "lng": 144.9015596,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23337 STN Station Hotel.pdf"
     },
     {
         "Venue name": "GBH - Harlow Bar",
@@ -833,7 +887,8 @@
         "State": "VIC",
         "lat": -37.826795,
         "lng": 144.9979343,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23258 GBH Harlow Bar.pdf"
     },
     {
         "Venue name": "WBP - West Beach Pavilion",
@@ -848,14 +903,15 @@
         "State": "VIC",
         "lat": -37.8583082,
         "lng": 144.9684271,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23223 WPB West Beach Pavillion.pdf"
     },
     {
         "Venue name": "BHT - Bridge Hotel",
         "Site address": "642 Bridge Rd, Richmond, VIC 3121",
         "Quote No": 23256,
         "Date": "11 November",
-        "Sub Total": 3823.0,
+        "Sub Total": 3823,
         "Scope brief": "1 ladder",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": null,
@@ -863,7 +919,8 @@
         "State": "VIC",
         "lat": -37.820342,
         "lng": 145.0134269,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23256 BHTBridge Hotel.pdf"
     },
     {
         "Venue name": "JVCOM - Commonwealth Hotel",
@@ -878,7 +935,8 @@
         "State": "QLD",
         "lat": -17.5243152,
         "lng": 146.0273811,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23327 JVCOM commonwealth Hotel.pdf"
     },
     {
         "Venue name": "CRI - Criterion Hotel",
@@ -893,7 +951,8 @@
         "State": "VIC",
         "lat": -36.012053,
         "lng": 146.0045361,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23219 CIR Criterion Hotel.pdf"
     },
     {
         "Venue name": "BAL - Ball Court Hotel",
@@ -908,7 +967,8 @@
         "State": "VIC",
         "lat": -37.5811252,
         "lng": 144.7362693,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23320 BAL Ball Court Hotel.pdf"
     },
     {
         "Venue name": "COM - Commercial Hotel",
@@ -923,7 +983,8 @@
         "State": "QLD",
         "lat": -22.8256264,
         "lng": 147.6400145,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23348 JVCOM Commercial Hotel.pdf"
     },
     {
         "Venue name": "COL - College Lawn Hotel",
@@ -938,7 +999,8 @@
         "State": "VIC",
         "lat": -37.8488465,
         "lng": 144.9872707,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23332 COL College Lawn Hotel.pdf"
     },
     {
         "Venue name": "TGS The Generous Squire",
@@ -953,14 +1015,15 @@
         "State": "WA",
         "lat": -31.9517865,
         "lng": 115.853687,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23343 TGS The Generous Squire.pdf"
     },
     {
         "Venue name": "ROO - The Rook",
         "Site address": "Level 7/56-58 York St, Sydney, NSW 2000",
         "Quote No": 23221,
         "Date": "23 September",
-        "Sub Total": 8125.0,
+        "Sub Total": 8125,
         "Scope brief": "1m of guardrail",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": null,
@@ -968,14 +1031,15 @@
         "State": "NSW",
         "lat": -33.86884,
         "lng": 151.205835,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23221 ROO The Rook.pdf"
     },
     {
         "Venue name": "PKV - Parkerville Tavern",
         "Site address": "6 Owen Rd, Parkerville, WA 6081",
         "Quote No": 23345,
         "Date": "02/03/2026",
-        "Sub Total": 6320.0,
+        "Sub Total": 6320,
         "Scope brief": "1 ladder",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -983,14 +1047,15 @@
         "State": "WA",
         "lat": -31.8784886,
         "lng": 116.1345425,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23345 PKV Parkerville Tavern.pdf"
     },
     {
         "Venue name": "TBE - The Blended Elbow",
         "Site address": "80 Dean St, Albury, NSW 2640",
         "Quote No": 23315,
         "Date": "26/02/2026",
-        "Sub Total": 16750.0,
+        "Sub Total": 16750,
         "Scope brief": "8m of walkway, 50m of guardrail, 1 gate",
         "Project Management (...)": "x",
         "Vertical and horizontal (...)": "x",
@@ -998,7 +1063,8 @@
         "State": "NSW",
         "lat": -36.0807331,
         "lng": 146.9156314,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23315 TBEThe Blended Elbow.pdf"
     },
     {
         "Venue name": "SMI - The Smith",
@@ -1013,7 +1079,8 @@
         "State": "VIC",
         "lat": -37.8526351,
         "lng": 144.9991337,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23264 SMIThe Smith.pdf"
     },
     {
         "Venue name": "SHE - Shenannigans",
@@ -1028,7 +1095,8 @@
         "State": "NT",
         "lat": -12.4586402,
         "lng": 130.83519,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23318 SHE Shenannigans.pdf"
     },
     {
         "Venue name": "FBH - Fairfield Park Boathouse & Tea Gardens",
@@ -1043,6 +1111,7 @@
         "State": "VIC",
         "lat": -37.7848135,
         "lng": 145.0116783,
-        "is_hq": false
+        "is_hq": false,
+        "pdf_filename": "23158 FBH Fairfield Park Boathouse & Tea Gardens.pdf"
     }
 ]

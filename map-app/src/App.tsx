@@ -18,9 +18,6 @@ function App() {
     return venues.filter((v) => v.State === selectedState || v.is_hq);
   }, [venues, selectedState]);
 
-  const activeMapVenues = useMemo(() => {
-    return filteredVenues.filter(v => selectedVenues.has(v['Venue name']) || v.is_hq);
-  }, [filteredVenues, selectedVenues]);
 
   const uniqueStates = useMemo(() => {
     const states = new Set(venues.map((v) => v.State).filter(s => s && s !== 'Unknown'));
@@ -64,7 +61,11 @@ function App() {
         onToggleAll={handleToggleAll}
       />
       <main className="map-container">
-        <MapView venues={activeMapVenues} />
+        <MapView
+          venues={filteredVenues}
+          selectedVenues={selectedVenues}
+          onVenueToggle={handleVenueToggle}
+        />
       </main>
     </div>
   );

@@ -24,10 +24,21 @@ const hqIcon = new L.Icon({
     shadowSize: [41, 41]
 });
 
+const greyIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
 L.Marker.prototype.options.icon = defaultIcon;
 
 interface MapViewProps {
     venues: Venue[];
+    selectedVenues: Set<string>;
+    onVenueToggle: (venueName: string, selected: boolean) => void;
 }
 
 // Component to dynamically adjust map bounds when filtered
@@ -48,7 +59,7 @@ function MapBounds({ venues }: { venues: Venue[] }) {
     return null;
 }
 
-export default function MapView({ venues }: MapViewProps) {
+export default function MapView({ venues, selectedVenues, onVenueToggle }: MapViewProps) {
     // Center roughly on Australia
     const center: [number, number] = [-25.274398, 133.775136];
 
@@ -69,14 +80,25 @@ export default function MapView({ venues }: MapViewProps) {
                         <Marker
                             key={`${venue['Venue name']}-${idx}`}
                             position={[venue.lat, venue.lng]}
-                            icon={venue.is_hq ? hqIcon : defaultIcon}
-                            zIndexOffset={venue.is_hq ? 1000 : 0}
+                            icon={venue.is_hq ? hqIcon : (selectedVenues.has(venue['Venue name']) ? defaultIcon : greyIcon)}
+                            zIndexOffset={venue.is_hq ? 1000 : (selectedVenues.has(venue['Venue name']) ? 500 : 0)}
                         >
                             <Popup className="custom-popup">
                                 <div className="popup-content">
-                                    <h3 className="popup-title">
-                                        {venue.is_hq && <span className="hq-badge">HQ</span>}
-                                        {venue['Venue name']}
+                                    <h3 className="popup-title" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                            {venue.is_hq && <span className="hq-badge">HQ</span>}
+                                            <span>{venue['Venue name']}</span>
+                                        </div>
+                                        {!venue.is_hq && (
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedVenues.has(venue['Venue name'])}
+                                                onChange={(e) => onVenueToggle(venue['Venue name'], e.target.checked)}
+                                                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent-primary)', marginTop: '4px' }}
+                                                title="Select venue"
+                                            />
+                                        )}
                                     </h3>
                                     <p className="popup-address"><i className="icon-location"></i> {venue['Site address']}</p>
 

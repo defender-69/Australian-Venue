@@ -1,0 +1,112 @@
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import type { Venue } from '../types';
+import { useEffect } from 'react';
+
+// Custom icons
+const defaultIcon = new L.Icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+const hqIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+});
+
+L.Marker.prototype.options.icon = defaultIcon;
+
+interface MapViewProps {
+    venues: Venue[];
+}
+
+// Component to dynamically adjust map bounds when filtered
+function MapBounds({ venues }: { venues: Venue[] }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (venues.length === 0) return;
+
+        const validVenues = venues.filter(v => v.lat !== null && v.lng !== null);
+        if (validVenues.length === 0) return;
+
+        const bounds = L.latLngBounds(validVenues.map(v => [v.lat!, v.lng!]));
+        // Add padding so markers aren't right on the edge
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    }, [venues, map]);
+
+    return null;
+}
+
+export default function MapView({ venues }: MapViewProps) {
+    // Center roughly on Australia
+    const center: [number, number] = [-25.274398, 133.775136];
+
+    return (
+        <div className="map-wrapper">
+            <MapContainer center={center} zoom={4} scrollWheelZoom={true} className="leaflet-map">
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                />
+
+                <MapBounds venues={venues} />
+
+                {venues.map((venue, idx) => {
+                    if (venue.lat === null || venue.lng === null) return null;
+
+                    return (
+                        <Marker
+                            key={`${venue['Venue name']}-${idx}`}
+                            position={[venue.lat, venue.lng]}
+                            icon={venue.is_hq ? hqIcon : defaultIcon}
+                            zIndexOffset={venue.is_hq ? 1000 : 0}
+                        >
+                            <Popup className="custom-popup">
+                                <div className="popup-content">
+                                    <h3 className="popup-title">
+                                        {venue.is_hq && <span className="hq-badge">HQ</span>}
+                                        {venue['Venue name']}
+                                    </h3>
+                                    <p className="popup-address"><i className="icon-location"></i> {venue['Site address']}</p>
+
+                                    {!venue.is_hq && (
+                                        <>
+                                            <div className="popup-meta">
+                                                <span className="quote-no">Quote #{venue['Quote No']}</span>
+                                                <span className="quote-date">{venue['Date']}</span>
+                                            </div>
+
+                                            <div className="popup-value">
+                                                <span className="value-label">Sub Total:</span>
+                                                <span className="value-amount">
+                                                    {new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(venue['Sub Total'])}
+                                                </span>
+                                            </div>
+
+                                            {venue['Scope brief'] && (
+                                                <div className="popup-scope">
+                                                    <span className="scope-label">Scope:</span> {venue['Scope brief']}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+                            </Popup>
+                        </Marker>
+                    );
+                })}
+            </MapContainer>
+        </div>
+    );
+}

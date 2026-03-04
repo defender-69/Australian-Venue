@@ -5,15 +5,26 @@ interface SidebarProps {
     states: string[];
     selectedState: string;
     onStateChange: (state: string) => void;
+    selectedVenues: Set<string>;
+    onVenueToggle: (venueName: string, selected: boolean) => void;
+    onToggleAll: (selectAll: boolean) => void;
 }
 
-export default function Sidebar({ venues, states, selectedState, onStateChange }: SidebarProps) {
+export default function Sidebar({
+    venues, states, selectedState, onStateChange,
+    selectedVenues, onVenueToggle, onToggleAll
+}: SidebarProps) {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(amount);
     };
 
-    const totalValue = venues.reduce((sum, v) => sum + (v['Sub Total'] || 0), 0);
-    const quoteCount = venues.filter(v => !v.is_hq).length;
+    const activeSidebarVenues = venues.filter(v => v.is_hq || selectedVenues.has(v['Venue name']));
+    const totalValue = activeSidebarVenues.reduce((sum, v) => sum + (v['Sub Total'] || 0), 0);
+    const quoteCount = activeSidebarVenues.filter(v => !v.is_hq).length;
+
+    const hasFilteredVenues = venues.filter(v => !v.is_hq).length > 0;
+    const allFilteredAreSelected = hasFilteredVenues &&
+        venues.filter(v => !v.is_hq).every(v => selectedVenues.has(v['Venue name']));
 
     return (
         <aside className="sidebar">
@@ -39,7 +50,7 @@ export default function Sidebar({ venues, states, selectedState, onStateChange }
 
             <div className="summary-cards">
                 <div className="summary-card">
-                    <span className="card-label">Total Quotes</span>
+                    <span className="card-label">Selected Quotes</span>
                     <span className="card-value">{quoteCount}</span>
                 </div>
                 <div className="summary-card highlight">
@@ -50,13 +61,40 @@ export default function Sidebar({ venues, states, selectedState, onStateChange }
 
             <div className="venue-list-header">
                 <h2>{selectedState === 'All' ? 'Showing All' : `Quotes in ${selectedState}`}</h2>
+                {hasFilteredVenues && (
+                    <label className="select-all-label">
+                        <input
+                            type="checkbox"
+                            checked={allFilteredAreSelected}
+                            onChange={(e) => onToggleAll(e.target.checked)}
+                        />
+                        Select All
+                    </label>
+                )}
             </div>
 
             <div className="venue-list">
                 {venues.map((venue, idx) => (
-                    <div key={idx} className={`venue-card ${venue.is_hq ? 'hq-card' : ''}`}>
-                        <div className="card-header">
-                            <span className="venue-name">{venue['Venue name']}</span>
+                    <div
+                        key={`${venue['Venue name']}-${idx}`}
+                        className={`venue-card ${venue.is_hq ? 'hq-card' : ''}`}
+                        onClick={() => {
+                            if (!venue.is_hq) {
+                                onVenueToggle(venue['Venue name'], !selectedVenues.has(venue['Venue name']));
+                            }
+                        }}
+                    >
+                        <div className="card-header" onClick={(e) => e.stopPropagation()}>
+                            <label className="venue-checkbox-label" style={{ width: venue.is_hq ? 'auto' : '100%' }}>
+                                {!venue.is_hq && (
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedVenues.has(venue['Venue name'])}
+                                        onChange={(e) => onVenueToggle(venue['Venue name'], e.target.checked)}
+                                    />
+                                )}
+                                <span className="venue-name">{venue['Venue name']}</span>
+                            </label>
                             {venue.is_hq && <span className="hq-badge">HQ</span>}
                         </div>
                         <p className="venue-address">{venue['Site address']}</p>

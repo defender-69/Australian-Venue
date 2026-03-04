@@ -125,7 +125,7 @@ export default function MapView({ venues, selectedVenues, onVenueToggle }: MapVi
                                             {venue.pdf_filename && (
                                                 <div style={{ marginTop: '12px', textAlign: 'center' }}>
                                                     <a
-                                                        href={`/quotes/${encodeURIComponent(venue.pdf_filename)}`}
+                                                        href={`${import.meta.env.BASE_URL}quotes/${encodeURIComponent(venue.pdf_filename)}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         style={{

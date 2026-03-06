@@ -1,67 +1,70 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { Venue } from '../types';
+import type { Venue, Bundle } from '../types';
 import { useEffect } from 'react';
 
-// Custom icons
-const defaultIcon = new L.Icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-});
-
+// HQ icon (red)
 const hqIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+    shadowSize: [41, 41],
 });
 
+// Grey icon for unassigned venues
 const greyIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    shadowSize: [41, 41]
+    shadowSize: [41, 41],
 });
 
-L.Marker.prototype.options.icon = defaultIcon;
+// Generate a coloured SVG pin icon from a hex colour
+function createColorIcon(color: string) {
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
+      <path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41C12.5 41 25 21.9 25 12.5C25 5.6 19.4 0 12.5 0Z"
+            fill="${color}" stroke="white" stroke-width="1.5"/>
+      <circle cx="12.5" cy="12.5" r="5" fill="white" opacity="0.85"/>
+    </svg>`;
+    return L.divIcon({
+        html: svg,
+        className: '',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+    });
+}
 
 interface MapViewProps {
     venues: Venue[];
-    selectedVenues: Set<string>;
-    onVenueToggle: (venueName: string, selected: boolean) => void;
+    bundles: Bundle[];
+    getBundleForVenue: (venueName: string) => Bundle | null;
+    addVenueToBundle: (venueName: string, bundleId: string) => void;
+    removeVenueFromBundle: (venueName: string) => void;
 }
 
-// Component to dynamically adjust map bounds when filtered
 function MapBounds({ venues }: { venues: Venue[] }) {
     const map = useMap();
-
     useEffect(() => {
         if (venues.length === 0) return;
-
-        const validVenues = venues.filter(v => v.lat !== null && v.lng !== null);
-        if (validVenues.length === 0) return;
-
-        const bounds = L.latLngBounds(validVenues.map(v => [v.lat!, v.lng!]));
-        // Add padding so markers aren't right on the edge
+        const valid = venues.filter(v => v.lat !== null && v.lng !== null);
+        if (valid.length === 0) return;
+        const bounds = L.latLngBounds(valid.map(v => [v.lat!, v.lng!]));
         map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
     }, [venues, map]);
-
     return null;
 }
 
-export default function MapView({ venues, selectedVenues, onVenueToggle }: MapViewProps) {
-    // Center roughly on Australia
+export default function MapView({ venues, bundles, getBundleForVenue, addVenueToBundle, removeVenueFromBundle }: MapViewProps) {
     const center: [number, number] = [-25.274398, 133.775136];
+    const formatCurrency = (v: number) =>
+        new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(v);
 
     return (
         <div className="map-wrapper">
@@ -70,37 +73,44 @@ export default function MapView({ venues, selectedVenues, onVenueToggle }: MapVi
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                 />
-
                 <MapBounds venues={venues} />
 
                 {venues.map((venue, idx) => {
                     if (venue.lat === null || venue.lng === null) return null;
 
+                    const bundle = getBundleForVenue(venue['Venue name']);
+                    const icon = venue.is_hq
+                        ? hqIcon
+                        : bundle
+                            ? createColorIcon(bundle.color)
+                            : greyIcon;
+
                     return (
                         <Marker
                             key={`${venue['Venue name']}-${idx}`}
                             position={[venue.lat, venue.lng]}
-                            icon={venue.is_hq ? hqIcon : (selectedVenues.has(venue['Venue name']) ? defaultIcon : greyIcon)}
-                            zIndexOffset={venue.is_hq ? 1000 : (selectedVenues.has(venue['Venue name']) ? 500 : 0)}
+                            icon={icon}
+                            zIndexOffset={venue.is_hq ? 1000 : bundle ? 500 : 0}
                         >
-                            <Popup className="custom-popup">
+                            <Popup className="custom-popup" minWidth={260}>
                                 <div className="popup-content">
-                                    <h3 className="popup-title" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                    <h3 className="popup-title">
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             {venue.is_hq && <span className="hq-badge">HQ</span>}
+                                            {bundle && (
+                                                <span
+                                                    className="popup-bundle-dot"
+                                                    style={{ backgroundColor: bundle.color }}
+                                                    title={`Bundle: ${bundle.name}`}
+                                                />
+                                            )}
                                             <span>{venue['Venue name']}</span>
                                         </div>
-                                        {!venue.is_hq && (
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedVenues.has(venue['Venue name'])}
-                                                onChange={(e) => onVenueToggle(venue['Venue name'], e.target.checked)}
-                                                style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--accent-primary)', marginTop: '4px' }}
-                                                title="Select venue"
-                                            />
-                                        )}
                                     </h3>
-                                    <p className="popup-address"><i className="icon-location"></i> {venue['Site address']}</p>
+
+                                    <p className="popup-address">
+                                        <i className="icon-location" /> {venue['Site address']}
+                                    </p>
 
                                     {!venue.is_hq && (
                                         <>
@@ -111,9 +121,7 @@ export default function MapView({ venues, selectedVenues, onVenueToggle }: MapVi
 
                                             <div className="popup-value">
                                                 <span className="value-label">Sub Total:</span>
-                                                <span className="value-amount">
-                                                    {new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(venue['Sub Total'])}
-                                                </span>
+                                                <span className="value-amount">{formatCurrency(venue['Sub Total'])}</span>
                                             </div>
 
                                             {venue['Scope brief'] && (
@@ -122,36 +130,75 @@ export default function MapView({ venues, selectedVenues, onVenueToggle }: MapVi
                                                 </div>
                                             )}
 
+                                            {/* Bundle assignment dropdown */}
+                                            <div className="popup-bundle-section">
+                                                {bundle ? (
+                                                    <div className="popup-bundle-assigned">
+                                                        <span
+                                                            className="popup-bundle-chip"
+                                                            style={{ backgroundColor: bundle.color + '22', borderColor: bundle.color, color: bundle.color }}
+                                                        >
+                                                            <span className="swatch-xs" style={{ backgroundColor: bundle.color }} />
+                                                            {bundle.name}
+                                                        </span>
+                                                        <div className="popup-bundle-actions">
+                                                            {bundles.length > 1 && (
+                                                                <select
+                                                                    className="popup-bundle-select"
+                                                                    value={bundle.id}
+                                                                    onChange={e => addVenueToBundle(venue['Venue name'], e.target.value)}
+                                                                >
+                                                                    {bundles.map(b => (
+                                                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                                                    ))}
+                                                                </select>
+                                                            )}
+                                                            <button
+                                                                className="popup-remove-btn"
+                                                                onClick={() => removeVenueFromBundle(venue['Venue name'])}
+                                                            >
+                                                                Remove from bundle
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="popup-bundle-unassigned">
+                                                        {bundles.length > 0 ? (
+                                                            <>
+                                                                <label className="popup-bundle-label">Add to bundle:</label>
+                                                                <select
+                                                                    className="popup-bundle-select"
+                                                                    defaultValue=""
+                                                                    onChange={e => {
+                                                                        if (e.target.value) addVenueToBundle(venue['Venue name'], e.target.value);
+                                                                    }}
+                                                                >
+                                                                    <option value="" disabled>Select a bundle…</option>
+                                                                    {bundles.map(b => (
+                                                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </>
+                                                        ) : (
+                                                            <p className="popup-no-bundles">No bundles yet — create one in the left panel.</p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             {venue.pdf_filename && (
                                                 <div style={{ marginTop: '12px', textAlign: 'center' }}>
                                                     <a
                                                         href={`${import.meta.env.BASE_URL}quotes/${encodeURIComponent(venue.pdf_filename)}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        style={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            gap: '6px',
-                                                            backgroundColor: 'var(--accent-primary, #007bff)',
-                                                            color: 'white',
-                                                            padding: '8px 12px',
-                                                            borderRadius: '6px',
-                                                            textDecoration: 'none',
-                                                            fontWeight: '500',
-                                                            fontSize: '13px',
-                                                            transition: 'opacity 0.2s',
-                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                                        }}
-                                                        onMouseOver={(e) => e.currentTarget.style.opacity = '0.9'}
-                                                        onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+                                                        className="popup-pdf-btn"
                                                     >
-                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                            <polyline points="14 2 14 8 20 8" />
+                                                            <line x1="16" y1="13" x2="8" y2="13" />
+                                                            <line x1="16" y1="17" x2="8" y2="17" />
                                                         </svg>
                                                         View Quote PDF
                                                     </a>

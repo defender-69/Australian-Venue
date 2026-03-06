@@ -11,3 +11,11 @@ export interface Venue {
     "is_hq": boolean;
     "pdf_filename"?: string;
 }
+
+export interface Bundle {
+    id: string;
+    name: string;
+    color: string;      // hex from 12-colour palette
+    discount: number;   // 0–100 %
+    venueNames: string[]; // exclusive — each venue belongs to at most one bundle
+}

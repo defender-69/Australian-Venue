@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Venue, Bundle } from '../types';
 
 interface BundleViewProps {
@@ -34,10 +34,38 @@ export default function BundleView({
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(value);
 
-    const handleDelete = () => {
-        if (window.confirm(`Delete bundle "${bundle.name}"? All venues will become unassigned.`)) {
-            onDeleteBundle(bundle.id);
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    const handleDeleteClick = (e?: React.MouseEvent) => {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
         }
+        setShowConfirm(true);
+    };
+
+    const confirmDelete = () => {
+        setShowConfirm(false);
+        onDeleteBundle(bundle.id);
+    };
+
+    const renderConfirmModal = () => {
+        if (!showConfirm) return null;
+        return (
+            <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) setShowConfirm(false); }}>
+                <div className="modal-dialog" style={{ width: 400, padding: 24 }}>
+                    <h3 style={{ fontSize: 17, marginBottom: 12, color: 'var(--text-primary)' }}>Delete Bundle</h3>
+                    <p style={{ fontSize: 13.5, color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: 24 }}>
+                        Are you sure you want to delete the bundle <strong>{bundle.name}</strong>?<br />
+                        All venues inside will become unassigned.
+                    </p>
+                    <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                        <button type="button" className="modal-cancel-btn" onClick={() => setShowConfirm(false)}>Cancel</button>
+                        <button type="button" className="modal-confirm-btn" style={{ backgroundColor: '#DC2626' }} onClick={confirmDelete}>Delete</button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     if (bundleVenues.length === 0) {
@@ -53,8 +81,9 @@ export default function BundleView({
                     </svg>
                     <p>No venues assigned to this bundle yet.</p>
                     <p className="hint">Click a marker on the map and use the <strong>Add to Bundle</strong> dropdown to assign venues here.</p>
-                    <button className="delete-bundle-btn ghost" onClick={handleDelete}>Delete this bundle</button>
+                    <button type="button" className="delete-bundle-btn ghost" onClick={handleDeleteClick}>Delete this bundle</button>
                 </div>
+                {renderConfirmModal()}
             </div>
         );
     }
@@ -74,7 +103,7 @@ export default function BundleView({
                     />
                     <span className="bundle-venue-count">{bundleVenues.length} sites</span>
                 </div>
-                <button className="delete-bundle-btn" onClick={handleDelete} title="Delete bundle">
+                <button type="button" className="delete-bundle-btn" onClick={handleDeleteClick} title="Delete bundle">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="3 6 5 6 21 6" />
                         <path d="M19 6l-1 14H6L5 6" />
@@ -161,6 +190,7 @@ export default function BundleView({
                     </div>
                 </div>
             </div>
+            {renderConfirmModal()}
         </div>
     );
 }

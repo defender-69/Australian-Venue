@@ -8,6 +8,7 @@ import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import BundleLegend from './BundleLegend';
+import MapSearchBar from './MapSearchBar';
 import type { Venue, Bundle, QuoteStatus } from '../types';
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 
@@ -342,7 +343,7 @@ export default function MapView({
             onBulkSelectComplete();
             return;
         }
-        const enclosed = regularVenues.filter(v => {
+        const enclosed = visibleVenues.filter(v => {
             if (v.lat === null || v.lng === null) return false;
             return bounds.contains(L.latLng(v.lat, v.lng));
         });
@@ -350,11 +351,12 @@ export default function MapView({
             addVenueToBundle(v['Venue name'], bulkSelectBundleId);
         }
         onBulkSelectComplete();
-    }, [regularVenues, bulkSelectBundleId, addVenueToBundle, onBulkSelectComplete]);
+    }, [visibleVenues, bulkSelectBundleId, addVenueToBundle, onBulkSelectComplete]);
 
     return (
         <div className="map-wrapper">
             <MapContainer center={center} zoom={4} scrollWheelZoom={true} className="leaflet-map">
+                <MapSearchBar venues={venues} />
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                     url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"

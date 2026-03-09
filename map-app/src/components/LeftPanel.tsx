@@ -147,11 +147,13 @@ export default function LeftPanel({
                             const val = bundleValue(bundle);
                             const discountedVal = val * (1 - bundle.discount / 100);
                             return (
-                                <button
+                                <div
                                     key={bundle.id}
                                     className="bundle-list-card"
                                     onClick={() => onOpenBundleTab(bundle.id)}
-                                    style={{ borderLeftColor: bundle.color }}
+                                    style={{ borderLeftColor: bundle.color, cursor: 'pointer' }}
+                                    role="button"
+                                    tabIndex={0}
                                 >
                                     <div className="bundle-card-top">
                                         <span
@@ -186,7 +188,7 @@ export default function LeftPanel({
                                         </svg>
                                         Select from Map
                                     </button>
-                                </button>
+                                </div>
                             );
                         })}
                     </div>

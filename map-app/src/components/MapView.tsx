@@ -134,62 +134,96 @@ interface MapViewProps {
     onBulkSelectComplete: () => void;
 }
 
-// ── External bulk-select: draw rectangle when activated by a bundle ──
+// ── External bulk-select: custom mouse-event rectangle drawing ──
 function ExternalRectangleSelect({ active, onComplete }: {
     active: boolean;
-    onComplete: (bounds: L.LatLngBounds) => void;
+    onComplete: (bounds: L.LatLngBounds | null) => void;
 }) {
     const map = useMap();
-    const handlerRef = useRef<L.Draw.Rectangle | null>(null);
+    const startLatLng = useRef<L.LatLng | null>(null);
+    const rectLayer = useRef<L.Rectangle | null>(null);
 
     useEffect(() => {
-        if (!active) {
-            // Disable if currently active
-            if (handlerRef.current) {
-                handlerRef.current.disable();
-                handlerRef.current = null;
-            }
-            return;
-        }
+        if (!active) return;
 
-        // Create and enable rectangle draw handler programmatically (no toolbar)
-        const handler = new L.Draw.Rectangle(map as unknown as L.DrawMap, {
-            shapeOptions: {
-                color: '#2563EB',
-                weight: 2,
-                fillOpacity: 0.12,
-                dashArray: '6 4',
-            },
-        });
-        handler.enable();
-        handlerRef.current = handler;
+        const container = map.getContainer();
 
-        const handleCreated = (e: L.LeafletEvent) => {
-            const event = e as L.DrawEvents.Created;
-            const layer = event.layer as L.Rectangle;
-            const bounds = layer.getBounds();
-            onComplete(bounds);
+        // Visual cue: crosshair cursor
+        container.style.cursor = 'crosshair';
+
+        // Disable map dragging so mousedown/drag draws a rectangle instead of panning
+        map.dragging.disable();
+
+        const onMouseDown = (e: L.LeafletMouseEvent) => {
+            startLatLng.current = e.latlng;
+
+            // Create initial zero-size rectangle
+            const rect = L.rectangle(
+                L.latLngBounds(e.latlng, e.latlng),
+                { color: '#2563EB', weight: 2, fillOpacity: 0.12, dashArray: '6 4', interactive: false }
+            );
+            rect.addTo(map);
+            rectLayer.current = rect;
         };
 
-        map.on(L.Draw.Event.CREATED, handleCreated);
+        const onMouseMove = (e: L.LeafletMouseEvent) => {
+            if (!startLatLng.current || !rectLayer.current) return;
+            rectLayer.current.setBounds(L.latLngBounds(startLatLng.current, e.latlng));
+        };
 
-        // Cancel on Escape
-        const handleKeyDown = (e: KeyboardEvent) => {
+        const onMouseUp = (e: L.LeafletMouseEvent) => {
+            if (!startLatLng.current) return;
+            const bounds = L.latLngBounds(startLatLng.current, e.latlng);
+
+            // Clean up the visual rectangle
+            if (rectLayer.current) {
+                map.removeLayer(rectLayer.current);
+                rectLayer.current = null;
+            }
+            startLatLng.current = null;
+
+            // Only select if the rectangle has meaningful size
+            const ne = map.latLngToContainerPoint(bounds.getNorthEast());
+            const sw = map.latLngToContainerPoint(bounds.getSouthWest());
+            const pixelWidth = Math.abs(ne.x - sw.x);
+            const pixelHeight = Math.abs(ne.y - sw.y);
+
+            if (pixelWidth > 10 && pixelHeight > 10) {
+                onComplete(bounds);
+            }
+            // If too small (accidental click), ignore but stay in draw mode
+        };
+
+        const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                handler.disable();
-                handlerRef.current = null;
-                onComplete(null as unknown as L.LatLngBounds); // signal cancel
+                // Clean up any in-progress rectangle
+                if (rectLayer.current) {
+                    map.removeLayer(rectLayer.current);
+                    rectLayer.current = null;
+                }
+                startLatLng.current = null;
+                onComplete(null);
             }
         };
-        document.addEventListener('keydown', handleKeyDown);
+
+        map.on('mousedown', onMouseDown);
+        map.on('mousemove', onMouseMove);
+        map.on('mouseup', onMouseUp);
+        document.addEventListener('keydown', onKeyDown);
 
         return () => {
-            map.off(L.Draw.Event.CREATED, handleCreated);
-            document.removeEventListener('keydown', handleKeyDown);
-            if (handlerRef.current) {
-                handlerRef.current.disable();
-                handlerRef.current = null;
+            container.style.cursor = '';
+            map.dragging.enable();
+            map.off('mousedown', onMouseDown);
+            map.off('mousemove', onMouseMove);
+            map.off('mouseup', onMouseUp);
+            document.removeEventListener('keydown', onKeyDown);
+
+            if (rectLayer.current) {
+                map.removeLayer(rectLayer.current);
+                rectLayer.current = null;
             }
+            startLatLng.current = null;
         };
     }, [active, map, onComplete]);
 
@@ -287,7 +321,7 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
     // ── External bulk select handler ──
     const bulkSelectBundle = bundles.find(b => b.id === bulkSelectBundleId);
 
-    const handleBulkDrawComplete = useCallback((bounds: L.LatLngBounds) => {
+    const handleBulkDrawComplete = useCallback((bounds: L.LatLngBounds | null) => {
         if (!bounds || !bulkSelectBundleId) {
             // Cancelled (Esc) or no target bundle
             onBulkSelectComplete();

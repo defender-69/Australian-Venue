@@ -526,57 +526,38 @@ body,
   height: 100%;
 }
 
-/* ─── Marker Clusters ────────────────────────────────────── */
-.marker-cluster-small,
-.marker-cluster-medium,
-.marker-cluster-large {
-  background: rgba(90, 96, 112, .15) !important;
+/* ─── Pie-Chart Cluster Icons ────────────────────────────── */
+.pie-cluster-icon {
+  background: none !important;
+  border: none !important;
 }
 
-.marker-cluster-small div,
-.marker-cluster-medium div,
-.marker-cluster-large div {
-  background: var(--text-secondary) !important;
+/* Override any default markercluster background */
+.marker-cluster {
+  background: transparent !important;
+}
+
+.marker-cluster div {
+  background: transparent !important;
+}
+
+/* ─── Value Tooltips ─────────────────────────────────────── */
+.value-tooltip {
+  background: rgba(26, 29, 35, 0.82) !important;
   color: #fff !important;
+  border: none !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
   font-family: var(--font) !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  font-size: 12px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  white-space: nowrap !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .18) !important;
+  letter-spacing: 0.2px;
 }
 
-.marker-cluster-small {
-  width: 36px !important;
-  height: 36px !important;
-}
-
-.marker-cluster-small div {
-  width: 28px !important;
-  height: 28px !important;
-  border-radius: 50% !important;
-}
-
-.marker-cluster-medium {
-  width: 42px !important;
-  height: 42px !important;
-}
-
-.marker-cluster-medium div {
-  width: 34px !important;
-  height: 34px !important;
-  border-radius: 50% !important;
-}
-
-.marker-cluster-large {
-  width: 50px !important;
-  height: 50px !important;
-}
-
-.marker-cluster-large div {
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50% !important;
+.value-tooltip::before {
+  border-right-color: rgba(26, 29, 35, 0.82) !important;
 }
 
 /* ─── Popup ──────────────────────────────────────────────── */
@@ -786,19 +767,22 @@ body,
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--accent);
-  color: white;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
   padding: 7px 14px;
   border-radius: var(--radius-sm);
   text-decoration: none;
   font-size: 12.5px;
   font-weight: 600;
-  transition: background .15s;
+  transition: background .15s, border-color .15s;
   width: 100%;
 }
 
 .popup-pdf-btn:hover {
-  background: var(--accent-hover);
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ─── Bundle View (tab content) ─────────────────────────── */

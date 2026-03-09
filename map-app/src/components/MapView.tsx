@@ -1,6 +1,7 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
@@ -45,6 +46,80 @@ function createColorIcon(color: string) {
         popupAnchor: [1, -34],
     });
 }
+
+// Format value as abbreviated currency: $1.2K, $42K, $1.2M
+function formatShortCurrency(value: number): string {
+    if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `$${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}K`;
+    return `$${Math.round(value)}`;
+}
+
+// Generate an SVG pie-chart cluster icon
+function createPieClusterIcon(
+    colors: string[],
+    count: number,
+    totalValue: number,
+): L.DivIcon {
+    const size = count < 10 ? 44 : count < 30 ? 52 : 60;
+    const r = size / 2;
+    const innerR = r * 0.58; // inner circle for text
+    const uniqueColors = [...new Set(colors)];
+    const n = uniqueColors.length;
+
+    let slices = '';
+    if (n === 0 || (n === 1 && uniqueColors[0] === '#9AA0B0')) {
+        // All unassigned — solid grey
+        slices = `<circle cx="${r}" cy="${r}" r="${r}" fill="#9AA0B0" opacity="0.8"/>`;
+    } else if (n === 1) {
+        slices = `<circle cx="${r}" cy="${r}" r="${r}" fill="${uniqueColors[0]}" opacity="0.85"/>`;
+    } else {
+        // Equal pie slices
+        const angleStep = (2 * Math.PI) / n;
+        for (let i = 0; i < n; i++) {
+            const startAngle = i * angleStep - Math.PI / 2;
+            const endAngle = (i + 1) * angleStep - Math.PI / 2;
+            const x1 = r + r * Math.cos(startAngle);
+            const y1 = r + r * Math.sin(startAngle);
+            const x2 = r + r * Math.cos(endAngle);
+            const y2 = r + r * Math.sin(endAngle);
+            const largeArc = angleStep > Math.PI ? 1 : 0;
+            slices += `<path d="M${r},${r} L${x1},${y1} A${r},${r} 0 ${largeArc},1 ${x2},${y2} Z" fill="${uniqueColors[i]}" opacity="0.85"/>`;
+        }
+    }
+
+    const valueText = formatShortCurrency(totalValue);
+
+    // Pill dimensions: estimate text width (each char ~6.5px at font-size 10)
+    const pillCharW = 6.5;
+    const pillPadX = 6;
+    const pillH = 14;
+    const pillW = Math.max(pillCharW * valueText.length + pillPadX * 2, 28);
+    const pillY = size + 3; // below the pie circle
+    const totalH = size + pillH + 4;
+
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${totalH}" viewBox="0 0 ${size} ${totalH}">
+      ${slices}
+      <circle cx="${r}" cy="${r}" r="${innerR}" fill="white" opacity="0.92"/>
+      <text x="${r}" y="${r}" text-anchor="middle" dominant-baseline="central"
+            font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="13" fill="#1A1D23">${count}</text>
+      <!-- value pill -->
+      <rect x="${(size - pillW) / 2}" y="${pillY}" width="${pillW}" height="${pillH}"
+            rx="${pillH / 2}" fill="rgba(26,29,35,0.82)"/>
+      <text x="${r}" y="${pillY + pillH / 2}" text-anchor="middle" dominant-baseline="central"
+            font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="9.5" fill="white">${valueText}</text>
+    </svg>`;
+
+    return L.divIcon({
+        html: svg,
+        className: 'pie-cluster-icon',
+        iconSize: [size, totalH],
+        iconAnchor: [size / 2, size / 2],
+    });
+}
+
+// Unassigned color constant
+const UNASSIGNED_COLOR = '#9AA0B0';
 
 interface MapViewProps {
     venues: Venue[];
@@ -94,10 +169,45 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
             if (bundle) {
                 return !hiddenBundleIds.has(bundle.id);
             }
-            // Unassigned venues
             return !hiddenBundleIds.has('__unassigned__');
         });
     }, [regularVenues, hiddenBundleIds, getBundleForVenue]);
+
+    // Build coord-keyed lookup for iconCreateFunction (bundle color + value)
+    const venueDataByCoord = useMemo(() => {
+        const map = new Map<string, { color: string; value: number }[]>();
+        for (const venue of visibleVenues) {
+            if (venue.lat === null || venue.lng === null) continue;
+            const key = `${venue.lat},${venue.lng}`;
+            const bundle = getBundleForVenue(venue['Venue name']);
+            const entry = { color: bundle?.color ?? UNASSIGNED_COLOR, value: venue['Sub Total'] || 0 };
+            const existing = map.get(key);
+            if (existing) existing.push(entry);
+            else map.set(key, [entry]);
+        }
+        return map;
+    }, [visibleVenues, getBundleForVenue]);
+
+    // Pie-chart cluster icon factory
+    const iconCreateFunction = useCallback((cluster: L.MarkerCluster) => {
+        const children = cluster.getAllChildMarkers();
+        const colors: string[] = [];
+        let total = 0;
+        for (const m of children) {
+            const ll = m.getLatLng();
+            const key = `${ll.lat},${ll.lng}`;
+            const entries = venueDataByCoord.get(key);
+            if (entries) {
+                for (const e of entries) {
+                    colors.push(e.color);
+                    total += e.value;
+                }
+            } else {
+                colors.push(UNASSIGNED_COLOR);
+            }
+        }
+        return createPieClusterIcon(colors, children.length, total);
+    }, [venueDataByCoord]);
 
     return (
         <div className="map-wrapper">
@@ -141,6 +251,7 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                     showCoverageOnHover={false}
                     maxClusterRadius={50}
                     chunkedLoading
+                    iconCreateFunction={iconCreateFunction}
                 >
                     {visibleVenues.map((venue, idx) => {
                         if (venue.lat === null || venue.lng === null) return null;
@@ -157,6 +268,14 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                                 icon={icon}
                                 zIndexOffset={bundle ? 500 : 0}
                             >
+                                <Tooltip
+                                    permanent
+                                    direction="right"
+                                    offset={[12, -20]}
+                                    className="value-tooltip"
+                                >
+                                    {formatShortCurrency(venue['Sub Total'] || 0)}
+                                </Tooltip>
                                 <Popup className="custom-popup" minWidth={260}>
                                     <div className="popup-content">
                                         <h3 className="popup-title">

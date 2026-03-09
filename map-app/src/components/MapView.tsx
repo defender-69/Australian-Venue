@@ -7,7 +7,6 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
-import StateBoundary from './StateBoundary';
 import BundleLegend from './BundleLegend';
 import type { Venue, Bundle } from '../types';
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
@@ -126,7 +125,6 @@ const UNASSIGNED_COLOR = '#9AA0B0';
 interface MapViewProps {
     venues: Venue[];
     bundles: Bundle[];
-    selectedState: string;
     getBundleForVenue: (venueName: string) => Bundle | null;
     addVenueToBundle: (venueName: string, bundleId: string) => void;
     removeVenueFromBundle: (venueName: string) => void;
@@ -242,7 +240,7 @@ function MapBounds({ venues }: { venues: Venue[] }) {
     return null;
 }
 
-export default function MapView({ venues, bundles, selectedState, getBundleForVenue, addVenueToBundle, removeVenueFromBundle, bulkSelectBundleId, onBulkSelectComplete }: MapViewProps) {
+export default function MapView({ venues, bundles, getBundleForVenue, addVenueToBundle, removeVenueFromBundle, bulkSelectBundleId, onBulkSelectComplete }: MapViewProps) {
     const center: [number, number] = [-25.274398, 133.775136];
     const formatCurrency = (v: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(v);
@@ -345,7 +343,6 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                     url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                 />
                 <MapBounds venues={venues} />
-                <StateBoundary selectedState={selectedState} />
 
                 {/* HQ markers — always visible, never clustered */}
                 {hqVenues.map((venue, idx) => {

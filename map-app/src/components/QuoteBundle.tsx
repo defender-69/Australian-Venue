@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef } from 'react';
+import { toast } from 'react-hot-toast';
 import type { Venue, Bundle, BundleStatus } from '../types';
 import { exportCSV, exportPDF } from '../exportBundle';
 import {
@@ -313,7 +314,16 @@ export default function BundleView({
                                 </svg>
                                 Export as CSV
                             </button>
-                            <button type="button" onClick={() => { exportPDF(bundle, venues); setShowExportMenu(false); }}>
+                            <button type="button" onClick={async () => {
+                                setShowExportMenu(false);
+                                const loading = toast.loading('Generating PDF...');
+                                try {
+                                    await exportPDF(bundle, venues);
+                                    toast.success('PDF Export downloaded!', { id: loading });
+                                } catch (e) {
+                                    toast.error('Failed to generate PDF', { id: loading });
+                                }
+                            }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                     <polyline points="14 2 14 8 20 8" />

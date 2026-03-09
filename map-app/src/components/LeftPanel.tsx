@@ -25,9 +25,7 @@ export const BUNDLE_COLORS = [
 interface LeftPanelProps {
     venues: Venue[];
     bundles: Bundle[];
-    selectedState: string;
-    states: string[];
-    onStateChange: (state: string) => void;
+    activeTab: string;
     onOpenBundleTab: (bundleId: string) => void;
     onCreateBundle: () => void;
     onBulkSelectFromMap: (bundleId: string) => void;
@@ -36,9 +34,7 @@ interface LeftPanelProps {
 export default function LeftPanel({
     venues,
     bundles,
-    selectedState,
-    states,
-    onStateChange,
+    activeTab,
     onOpenBundleTab,
     onCreateBundle,
     onBulkSelectFromMap,
@@ -60,27 +56,44 @@ export default function LeftPanel({
 
     return (
         <aside className="left-panel">
-            <div className="left-panel-header">
-                <div className="app-logo">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                        <circle cx="12" cy="10" r="3" />
-                    </svg>
+            <div className="left-panel-header" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'var(--bg-panel)' }}>
+                <div style={{ flexShrink: 0 }}>
+                    <img src={`${import.meta.env.BASE_URL}defender-logo.png`} alt="Defender" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
                 </div>
-                <div>
-                    <h1 className="panel-title">Venue Quoter</h1>
-                    <p className="panel-subtitle">Quote Bundle Manager</p>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.2 }}>Defender / Australian Venue Co.</span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>Quote Bundle Manager</span>
                 </div>
             </div>
 
             {/* KPI Dashboard */}
             <div className="kpi-section">
+                <button
+                    className="create-bundle-btn"
+                    onClick={() => onOpenBundleTab('map')}
+                    style={{
+                        marginBottom: '16px',
+                        marginTop: 0,
+                        borderStyle: 'solid',
+                        background: activeTab === 'map' ? 'var(--accent-light)' : 'var(--bg-surface)',
+                        color: activeTab === 'map' ? 'var(--accent)' : 'var(--text-primary)',
+                        borderColor: activeTab === 'map' ? 'var(--accent)' : 'var(--border)',
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                        <line x1="8" y1="2" x2="8" y2="18" />
+                        <line x1="16" y1="6" x2="16" y2="22" />
+                    </svg>
+                    Map View
+                </button>
+
                 <div className="kpi-grid">
-                    <div className="kpi-card">
+                    <div className="kpi-card" style={{ gridColumn: 'span 1' }}>
                         <span className="kpi-value">{totalQuotes}</span>
                         <span className="kpi-label">Total Quotes</span>
                     </div>
-                    <div className="kpi-card kpi-highlight">
+                    <div className="kpi-card kpi-highlight" style={{ gridColumn: 'span 1' }}>
                         <span className="kpi-value">{formatCurrency(totalValue)}</span>
                         <span className="kpi-label">Portfolio Value</span>
                     </div>
@@ -109,22 +122,6 @@ export default function LeftPanel({
                         })}
                     </div>
                 )}
-            </div>
-
-            {/* State Filter */}
-            <div className="panel-filter-section">
-                <label htmlFor="state-filter-panel" className="filter-label">Filter Map by State</label>
-                <div className="select-wrapper">
-                    <select
-                        id="state-filter-panel"
-                        value={selectedState}
-                        onChange={e => onStateChange(e.target.value)}
-                    >
-                        {states.map(state => (
-                            <option key={state} value={state}>{state === 'All' ? 'All States' : state}</option>
-                        ))}
-                    </select>
-                </div>
             </div>
 
             {/* Bundle List */}

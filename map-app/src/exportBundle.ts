@@ -41,7 +41,7 @@ export function exportCSV(bundle: Bundle, venues: Venue[]) {
 
 // ── PDF Export ──────────────────────────────────────────────
 
-export function exportPDF(bundle: Bundle, venues: Venue[]) {
+export async function exportPDF(bundle: Bundle, venues: Venue[]) {
     const bundleVenues = venues.filter(v => bundle.venueNames.includes(v['Venue name']));
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
@@ -52,17 +52,33 @@ export function exportPDF(bundle: Bundle, venues: Venue[]) {
     // ── Header with Workplace Defender branding ──
     const headerY = 12;
 
-    // Company name — bold
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text('Workplace', 14, headerY);
-    doc.setFontSize(22);
-    doc.text('DEFENDER', 14, headerY + 8);
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
-    doc.text('Independently Certified Safety', 14, headerY + 13);
+    try {
+        const logoUrl = `${import.meta.env.BASE_URL}defender-logo.png`;
+        const imgBlob = await fetch(logoUrl).then(r => r.blob());
+        const reader = new FileReader();
+
+        const dataUrl = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(imgBlob);
+        });
+
+        const img = new Image();
+        img.src = dataUrl;
+        await new Promise((resolve) => { img.onload = resolve; });
+
+        const targetHeight = 14;
+        const targetWidth = targetHeight * (img.width / img.height);
+
+        doc.addImage(dataUrl, 'PNG', 14, headerY - 2, targetWidth, targetHeight);
+    } catch (e) {
+        // Fallback to text if image loading fails
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(18);
+        doc.setTextColor(40, 40, 40);
+        doc.text('Workplace', 14, headerY);
+        doc.setFontSize(22);
+        doc.text('DEFENDER', 14, headerY + 8);
+    }
 
     // Company details — right aligned
     doc.setFont('helvetica', 'normal');
@@ -133,6 +149,7 @@ export function exportPDF(bundle: Bundle, venues: Venue[]) {
                 : []),
             ['', '', '', '', 'Revised Total:', formatCurr(revisedTotal)],
         ],
+        showFoot: 'lastPage',
         styles: {
             font: 'helvetica',
             fontSize: 9,

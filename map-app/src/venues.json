@@ -1,16 +1,5 @@
 [
     {
-        "Venue name": "Defender Headquarters",
-        "Site address": "42 Overseas Drive, Noble Park North VIC",
-        "Quote No": "N/A",
-        "Date": "N/A",
-        "Sub Total": 0,
-        "State": "VIC",
-        "lat": -37.9547,
-        "lng": 145.1848,
-        "is_hq": true
-    },
-    {
         "Venue name": "ESP - Hotel Esplanade",
         "Site address": "11 The Esplanade, St Kilda, VIC 3182",
         "Quote No": 23340,

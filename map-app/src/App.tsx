@@ -133,6 +133,7 @@ function App() {
             <MapView
               venues={filteredVenues}
               bundles={bundles}
+              selectedState={selectedState}
               getBundleForVenue={getBundleForVenue}
               addVenueToBundle={addVenueToBundle}
               removeVenueFromBundle={removeVenueFromBundle}

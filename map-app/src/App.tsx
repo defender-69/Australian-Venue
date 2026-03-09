@@ -31,6 +31,7 @@ function App() {
     setBundleNotes,
     setBundleStatus,
     reorderVenuesInBundle,
+    reorderBundles,
     getBundleForVenue,
   } = useBundles();
 
@@ -117,6 +118,7 @@ function App() {
             setBulkSelectBundleId(bundleId);
             setActiveTab('map');
           }}
+          onReorderBundles={reorderBundles}
           onExportSession={handleExportSession}
           onImportSession={handleImportSession}
         />

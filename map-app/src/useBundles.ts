@@ -104,6 +104,20 @@ export function useBundles() {
         setBundles(prev => prev.map(b => b.id === id ? { ...b, venueNames } : b));
     }, []);
 
+    // Reorder the bundles list itself
+    const reorderBundles = useCallback((newOrderIds: string[]) => {
+        setBundles(prev => {
+            const sorted = [...prev].sort((a, b) => {
+                const indexA = newOrderIds.indexOf(a.id);
+                const indexB = newOrderIds.indexOf(b.id);
+                if (indexA === -1) return 1;
+                if (indexB === -1) return -1;
+                return indexA - indexB;
+            });
+            return sorted;
+        });
+    }, []);
+
     // Get the bundle a venue belongs to (or null if unassigned)
     const getBundleForVenue = useCallback((venueName: string): Bundle | null => {
         return bundles.find(b => b.venueNames.includes(venueName)) ?? null;
@@ -121,6 +135,7 @@ export function useBundles() {
         setBundleNotes,
         setBundleStatus,
         reorderVenuesInBundle,
+        reorderBundles,
         getBundleForVenue,
     };
 }

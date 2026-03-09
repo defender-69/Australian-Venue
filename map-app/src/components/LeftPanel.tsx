@@ -1,5 +1,21 @@
 import { useRef } from 'react';
 import type { Bundle, Venue, BundleStatus } from '../types';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+    useSortable,
+    arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const PIPELINE_CONFIG: Record<BundleStatus, { label: string; color: string }> = {
     draft: { label: 'Draft', color: '#94A3B8' },
@@ -23,6 +39,77 @@ export const BUNDLE_COLORS = [
     '#00BCD4', // Cyan
 ];
 
+function SortableBundleCard({
+    bundle,
+    bundleValue,
+    formatCurrency,
+    onOpenBundleTab,
+    onBulkSelectFromMap,
+}: {
+    bundle: Bundle;
+    bundleValue: number;
+    formatCurrency: (amount: number) => string;
+    onOpenBundleTab: (id: string) => void;
+    onBulkSelectFromMap: (id: string) => void;
+}) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: bundle.id });
+
+    const style = {
+        transform: CSS.Translate.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        borderLeftColor: bundle.color,
+        cursor: isDragging ? 'grabbing' : 'pointer'
+    };
+
+    const discountedVal = bundleValue * (1 - bundle.discount / 100);
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className="bundle-list-card"
+            onClick={() => onOpenBundleTab(bundle.id)}
+            role="button"
+            tabIndex={0}
+        >
+            <div className="bundle-card-top">
+                <span className="bundle-color-swatch" style={{ backgroundColor: bundle.color }} />
+                <span className="bundle-card-name" style={{ flexGrow: 1, pointerEvents: 'none' }}>{bundle.name}</span>
+                <span className="bundle-venue-badge">{bundle.venueNames.length}</span>
+                <span
+                    className="bundle-card-status"
+                    style={{ backgroundColor: PIPELINE_CONFIG[bundle.status || 'draft'].color + '20', color: PIPELINE_CONFIG[bundle.status || 'draft'].color }}
+                >
+                    {PIPELINE_CONFIG[bundle.status || 'draft'].label}
+                </span>
+            </div>
+            <div className="bundle-card-bottom">
+                <span className="bundle-card-value">{formatCurrency(discountedVal)}</span>
+                {bundle.discount > 0 && (
+                    <span className="bundle-discount-tag">-{bundle.discount}%</span>
+                )}
+            </div>
+            <button
+                className="bundle-card-select-btn"
+                onPointerDown={(e) => { e.stopPropagation(); }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onBulkSelectFromMap(bundle.id);
+                }}
+                title="Draw a rectangle on the map to bulk-add venues to this bundle"
+            >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" style={{ strokeDasharray: '4 3' }} />
+                </svg>
+                Select from Map
+            </button>
+        </div>
+    );
+}
+
 interface LeftPanelProps {
     venues: Venue[];
     bundles: Bundle[];
@@ -30,6 +117,7 @@ interface LeftPanelProps {
     onOpenBundleTab: (bundleId: string) => void;
     onCreateBundle: () => void;
     onBulkSelectFromMap: (bundleId: string) => void;
+    onReorderBundles: (newOrderIds: string[]) => void;
     onExportSession: () => void;
     onImportSession: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -41,10 +129,26 @@ export default function LeftPanel({
     onOpenBundleTab,
     onCreateBundle,
     onBulkSelectFromMap,
+    onReorderBundles,
     onExportSession,
     onImportSession,
 }: LeftPanelProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor),
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            const oldIndex = bundles.findIndex(b => b.id === active.id);
+            const newIndex = bundles.findIndex(b => b.id === over.id);
+            const newOrder = arrayMove(bundles.map(b => b.id), oldIndex, newIndex);
+            onReorderBundles(newOrder);
+        }
+    };
 
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(amount);
@@ -147,54 +251,27 @@ export default function LeftPanel({
                     </div>
                 ) : (
                     <div className="bundle-list">
-                        {bundles.map(bundle => {
-                            const val = bundleValue(bundle);
-                            const discountedVal = val * (1 - bundle.discount / 100);
-                            return (
-                                <div
-                                    key={bundle.id}
-                                    className="bundle-list-card"
-                                    onClick={() => onOpenBundleTab(bundle.id)}
-                                    style={{ borderLeftColor: bundle.color, cursor: 'pointer' }}
-                                    role="button"
-                                    tabIndex={0}
-                                >
-                                    <div className="bundle-card-top">
-                                        <span
-                                            className="bundle-color-swatch"
-                                            style={{ backgroundColor: bundle.color }}
-                                        />
-                                        <span className="bundle-card-name">{bundle.name}</span>
-                                        <span className="bundle-venue-badge">{bundle.venueNames.length}</span>
-                                        <span
-                                            className="bundle-card-status"
-                                            style={{ backgroundColor: PIPELINE_CONFIG[bundle.status || 'draft'].color + '20', color: PIPELINE_CONFIG[bundle.status || 'draft'].color }}
-                                        >
-                                            {PIPELINE_CONFIG[bundle.status || 'draft'].label}
-                                        </span>
-                                    </div>
-                                    <div className="bundle-card-bottom">
-                                        <span className="bundle-card-value">{formatCurrency(discountedVal)}</span>
-                                        {bundle.discount > 0 && (
-                                            <span className="bundle-discount-tag">-{bundle.discount}%</span>
-                                        )}
-                                    </div>
-                                    <button
-                                        className="bundle-card-select-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onBulkSelectFromMap(bundle.id);
-                                        }}
-                                        title="Draw a rectangle on the map to bulk-add venues to this bundle"
-                                    >
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" style={{ strokeDasharray: '4 3' }} />
-                                        </svg>
-                                        Select from Map
-                                    </button>
-                                </div>
-                            );
-                        })}
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={bundles.map(b => b.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {bundles.map(bundle => (
+                                    <SortableBundleCard
+                                        key={bundle.id}
+                                        bundle={bundle}
+                                        bundleValue={bundleValue(bundle)}
+                                        formatCurrency={formatCurrency}
+                                        onOpenBundleTab={onOpenBundleTab}
+                                        onBulkSelectFromMap={onBulkSelectFromMap}
+                                    />
+                                ))}
+                            </SortableContext>
+                        </DndContext>
                     </div>
                 )}
 

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import type { Bundle, BundleStatus } from './types';
+import type { Bundle, QuoteStatus } from './types';
 
 const STORAGE_KEY = 'venue-bundles';
+const STATUS_KEY = 'quote-statuses';
 
 function generateId(): string {
     return `bundle-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -18,10 +19,24 @@ export function useBundles() {
         }
     });
 
-    // Persist to localStorage whenever bundles change
+    const [quoteStatuses, setQuoteStatuses] = useState<Record<string, QuoteStatus>>(() => {
+        try {
+            const stored = localStorage.getItem(STATUS_KEY);
+            return stored ? JSON.parse(stored) : {};
+        } catch {
+            return {};
+        }
+    });
+
+    // Persist to localStorage whenever bundles or statuses change
     useEffect(() => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(bundles));
     }, [bundles]);
+
+    useEffect(() => {
+        localStorage.setItem(STATUS_KEY, JSON.stringify(quoteStatuses));
+    }, [quoteStatuses]);
+
 
     const createBundle = useCallback((name: string, color: string) => {
         const newBundle: Bundle = {
@@ -31,7 +46,6 @@ export function useBundles() {
             discount: 0,
             venueNames: [],
             notes: '',
-            status: 'draft',
         };
         setBundles(prev => [...prev, newBundle]);
         return newBundle.id;
@@ -94,9 +108,26 @@ export function useBundles() {
         setBundles(prev => prev.map(b => b.id === id ? { ...b, notes } : b));
     }, []);
 
-    // Set pipeline status for a bundle
-    const setBundleStatus = useCallback((id: string, status: BundleStatus) => {
-        setBundles(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+    // Set pipeline status for a quote
+    const setQuoteStatus = useCallback((venueName: string, status: QuoteStatus) => {
+        setQuoteStatuses(prev => ({ ...prev, [venueName]: status }));
+    }, []);
+
+    // Set pipeline status for multiple quotes
+    const bulkSetQuoteStatus = useCallback((venueNames: string[], status: QuoteStatus) => {
+        setQuoteStatuses(prev => {
+            const next = { ...prev };
+            venueNames.forEach(name => { next[name] = status; });
+            return next;
+        });
+    }, []);
+
+    const getQuoteStatus = useCallback((venueName: string): QuoteStatus => {
+        return quoteStatuses[venueName] || 'draft';
+    }, [quoteStatuses]);
+
+    const loadQuoteStatuses = useCallback((newStatuses: Record<string, QuoteStatus>) => {
+        setQuoteStatuses(newStatuses);
     }, []);
 
     // Reorder venues within a bundle
@@ -132,10 +163,14 @@ export function useBundles() {
         setDiscount,
         addVenueToBundle,
         removeVenueFromBundle,
-        setBundleNotes,
-        setBundleStatus,
+        setNotesChange: setBundleNotes,
+        setQuoteStatus,
+        bulkSetQuoteStatus,
+        getQuoteStatus,
         reorderVenuesInBundle,
         reorderBundles,
         getBundleForVenue,
+        quoteStatuses,
+        loadQuoteStatuses,
     };
 }

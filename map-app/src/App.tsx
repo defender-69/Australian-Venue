@@ -7,6 +7,7 @@ import { useBundles } from './useBundles';
 import venuesData from './venues.json';
 import type { Venue, Bundle } from './types';
 import { Toaster, toast } from 'react-hot-toast';
+import type { QuoteStatus } from './types';
 
 type ActiveTab = 'map' | string; // 'map' or a bundle id
 
@@ -18,6 +19,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('map');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [bulkSelectBundleId, setBulkSelectBundleId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<Set<QuoteStatus>>(new Set(['draft', 'submitted', 'won', 'lost']));
 
   const {
     bundles,
@@ -28,16 +30,19 @@ function App() {
     setDiscount,
     addVenueToBundle,
     removeVenueFromBundle,
-    setBundleNotes,
-    setBundleStatus,
+    setNotesChange: setBundleNotes,
+    setQuoteStatus,
+    bulkSetQuoteStatus,
+    getQuoteStatus,
     reorderVenuesInBundle,
     reorderBundles,
     getBundleForVenue,
+    quoteStatuses,
   } = useBundles();
 
   const filteredVenues = useMemo(() => {
-    return venues;
-  }, [venues]);
+    return venues.filter(v => statusFilter.has(getQuoteStatus(v['Venue name'])));
+  }, [venues, statusFilter, getQuoteStatus]);
 
   const handleCreateBundle = (name: string, color: string) => {
     const id = createBundle(name, color);
@@ -77,12 +82,14 @@ function App() {
 
         // Sanitize: ensure venue exclusivity across all bundles
         const seen = new Set<string>();
-        parsedBundles.forEach(b => {
-          b.venueNames = b.venueNames.filter(n => !seen.has(n));
-          b.venueNames.forEach(n => seen.add(n));
+        parsedBundles.forEach((b: any) => {
+          b.venueNames = b.venueNames.filter((n: string) => !seen.has(n));
+          b.venueNames.forEach((n: string) => seen.add(n));
         });
 
         loadBundles(parsedBundles);
+        // Note: we might also want to import quoteStatuses here if added to the export.
+
         setActiveTab('map');
         toast.success("Session loaded successfully");
       } catch (error) {
@@ -121,6 +128,9 @@ function App() {
           onReorderBundles={reorderBundles}
           onExportSession={handleExportSession}
           onImportSession={handleImportSession}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          quoteStatuses={quoteStatuses}
         />
         {/* Right content area */}
         <main className="main-content-area">
@@ -133,6 +143,8 @@ function App() {
               removeVenueFromBundle={removeVenueFromBundle}
               bulkSelectBundleId={bulkSelectBundleId}
               onBulkSelectComplete={() => setBulkSelectBundleId(null)}
+              quoteStatuses={quoteStatuses}
+              setQuoteStatus={setQuoteStatus}
             />
           ) : activeBundle ? (
             <BundleView
@@ -143,8 +155,10 @@ function App() {
               onDeleteBundle={handleDeleteBundle}
               onRenameBundle={renameBundle}
               onNotesChange={setBundleNotes}
-              onStatusChange={setBundleStatus}
               onReorderVenues={reorderVenuesInBundle}
+              quoteStatuses={quoteStatuses}
+              setQuoteStatus={setQuoteStatus}
+              bulkSetQuoteStatus={bulkSetQuoteStatus}
             />
           ) : null}
         </main>

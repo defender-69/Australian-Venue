@@ -12,7 +12,7 @@ export interface Venue {
     "pdf_filename"?: string;
 }
 
-export type BundleStatus = 'draft' | 'submitted' | 'won' | 'lost';
+export type QuoteStatus = 'draft' | 'submitted' | 'won' | 'lost';
 
 export interface Bundle {
     id: string;
@@ -21,5 +21,4 @@ export interface Bundle {
     discount: number;   // 0–100 %
     venueNames: string[]; // exclusive — each venue belongs to at most one bundle
     notes: string;       // freeform estimator notes
-    status: BundleStatus; // pipeline status
 }

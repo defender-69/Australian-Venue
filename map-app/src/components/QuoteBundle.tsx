@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef } from 'react';
 import { toast } from 'react-hot-toast';
-import type { Venue, Bundle, BundleStatus } from '../types';
+import type { Venue, Bundle, QuoteStatus } from '../types';
 import { exportCSV, exportPDF } from '../exportBundle';
 import {
     DndContext,
@@ -19,7 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const STATUS_CONFIG: Record<BundleStatus, { label: string; color: string; icon: string }> = {
+const STATUS_CONFIG: Record<QuoteStatus, { label: string; color: string; icon: string }> = {
     draft: { label: 'Draft', color: '#94A3B8', icon: '✎' },
     submitted: { label: 'Submitted', color: '#3B82F6', icon: '→' },
     won: { label: 'Won', color: '#22C55E', icon: '✓' },
@@ -34,15 +34,19 @@ interface BundleViewProps {
     onDeleteBundle: (bundleId: string) => void;
     onRenameBundle: (bundleId: string, name: string) => void;
     onNotesChange: (bundleId: string, notes: string) => void;
-    onStatusChange: (bundleId: string, status: BundleStatus) => void;
     onReorderVenues: (bundleId: string, venueNames: string[]) => void;
+    quoteStatuses: Record<string, QuoteStatus>;
+    setQuoteStatus: (venueName: string, status: QuoteStatus) => void;
+    bulkSetQuoteStatus: (venueNames: string[], status: QuoteStatus) => void;
 }
 
 // ── Sortable Row Component ──
-function SortableRow({ id, venue, formatCurrency, onRemoveVenue }: {
+function SortableRow({ id, venue, formatCurrency, quoteStatus, onQuoteStatusChange, onRemoveVenue }: {
     id: string;
     venue: Venue;
     formatCurrency: (v: number) => string;
+    quoteStatus: QuoteStatus;
+    onQuoteStatusChange: (status: QuoteStatus) => void;
     onRemoveVenue: (name: string) => void;
 }) {
     const {
@@ -86,6 +90,26 @@ function SortableRow({ id, venue, formatCurrency, onRemoveVenue }: {
             </td>
             <td>{venue['Date']}</td>
             <td className="text-right">{formatCurrency(venue['Sub Total'])}</td>
+            <td>
+                <select
+                    value={quoteStatus}
+                    onChange={(e) => onQuoteStatusChange(e.target.value as QuoteStatus)}
+                    className="quote-status-select"
+                    style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid var(--border)',
+                        backgroundColor: STATUS_CONFIG[quoteStatus].color + '20',
+                        color: STATUS_CONFIG[quoteStatus].color,
+                        fontWeight: 600,
+                        fontSize: '12px'
+                    }}
+                >
+                    {(Object.keys(STATUS_CONFIG) as QuoteStatus[]).map(s => (
+                        <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
+                    ))}
+                </select>
+            </td>
             <td className="text-center">
                 <button
                     className="remove-btn"
@@ -107,8 +131,10 @@ export default function BundleView({
     onDeleteBundle,
     onRenameBundle,
     onNotesChange,
-    onStatusChange,
     onReorderVenues,
+    quoteStatuses,
+    setQuoteStatus,
+    bulkSetQuoteStatus,
 }: BundleViewProps) {
     const bundleVenues = useMemo(() => {
         const filtered = venues.filter(v => bundle.venueNames.includes(v['Venue name']));
@@ -130,10 +156,6 @@ export default function BundleView({
     const [notesExpanded, setNotesExpanded] = useState(!!(bundle.notes));
     const [showExportMenu, setShowExportMenu] = useState(false);
     const notesRef = useRef<HTMLTextAreaElement>(null);
-
-    // Status helpers
-    const currentStatus = bundle.status || 'draft';
-    const statusCfg = STATUS_CONFIG[currentStatus];
 
     // Drag & drop sensors and handler
     const sensors = useSensors(
@@ -183,24 +205,29 @@ export default function BundleView({
         );
     };
 
-    // ── Status Selector ──
-    const renderStatusSelector = () => (
-        <div className="bundle-status-selector">
-            {(Object.keys(STATUS_CONFIG) as BundleStatus[]).map(s => {
+    // ── Bulk Status Selector ──
+    const renderBulkStatusSelector = () => (
+        <div className="bundle-status-selector" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', marginRight: '8px' }}>Bulk apply to all quotes:</span>
+            {(Object.keys(STATUS_CONFIG) as QuoteStatus[]).map(s => {
                 const cfg = STATUS_CONFIG[s];
-                const isActive = currentStatus === s;
                 return (
                     <button
                         key={s}
                         type="button"
-                        className={`status-pill ${isActive ? 'active' : ''}`}
+                        className="status-pill"
                         style={{
                             '--status-color': cfg.color,
-                            backgroundColor: isActive ? cfg.color + '20' : 'transparent',
-                            borderColor: isActive ? cfg.color : 'var(--border)',
-                            color: isActive ? cfg.color : 'var(--text-secondary)',
+                            backgroundColor: 'transparent',
+                            borderColor: 'var(--border)',
+                            color: 'var(--text-secondary)',
                         } as React.CSSProperties}
-                        onClick={() => onStatusChange(bundle.id, s)}
+                        onClick={() => {
+                            if (bundleVenues.length > 0) {
+                                bulkSetQuoteStatus(bundle.venueNames, s);
+                                toast.success(`Applied ${cfg.label} to all quotes in bundle`);
+                            }
+                        }}
                     >
                         <span className="status-pill-icon">{cfg.icon}</span>
                         {cfg.label}
@@ -253,11 +280,7 @@ export default function BundleView({
                 <div className="bundle-empty-banner" style={{ borderColor: bundle.color, backgroundColor: bundle.color + '18' }}>
                     <span className="bundle-color-indicator" style={{ backgroundColor: bundle.color }} />
                     <h2>{bundle.name}</h2>
-                    <span className="status-badge-inline" style={{ backgroundColor: statusCfg.color + '20', color: statusCfg.color }}>
-                        {statusCfg.icon} {statusCfg.label}
-                    </span>
                 </div>
-                {renderStatusSelector()}
                 {renderNotesSection()}
                 <div className="bundle-empty-body">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}>
@@ -287,9 +310,6 @@ export default function BundleView({
                         aria-label="Bundle name"
                     />
                     <span className="bundle-venue-count">{bundleVenues.length} sites</span>
-                    <span className="status-badge-inline" style={{ backgroundColor: statusCfg.color + '20', color: statusCfg.color }}>
-                        {statusCfg.icon} {statusCfg.label}
-                    </span>
                 </div>
                 <button type="button" className="delete-bundle-btn" onClick={handleDeleteClick} title="Delete bundle">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -351,7 +371,7 @@ export default function BundleView({
             </div>
 
             {/* Status selector */}
-            {renderStatusSelector()}
+            {renderBulkStatusSelector()}
 
             <div className="bundle-content">
                 {/* Venue table */}
@@ -370,6 +390,7 @@ export default function BundleView({
                                     <th>Quote No</th>
                                     <th>Date</th>
                                     <th className="text-right">Original Value</th>
+                                    <th>Status</th>
                                     <th>Remove</th>
                                 </tr>
                             </thead>
@@ -384,6 +405,8 @@ export default function BundleView({
                                             id={venue['Venue name']}
                                             venue={venue}
                                             formatCurrency={formatCurrency}
+                                            quoteStatus={quoteStatuses[venue['Venue name']] || 'draft'}
+                                            onQuoteStatusChange={(newStatus) => setQuoteStatus(venue['Venue name'], newStatus)}
                                             onRemoveVenue={onRemoveVenue}
                                         />
                                     ))}

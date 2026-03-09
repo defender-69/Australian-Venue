@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import type { Bundle, Venue, BundleStatus } from '../types';
+import type { Bundle, Venue, QuoteStatus } from '../types';
 import {
     DndContext,
     closestCenter,
@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const PIPELINE_CONFIG: Record<BundleStatus, { label: string; color: string }> = {
+const PIPELINE_CONFIG: Record<QuoteStatus, { label: string; color: string }> = {
     draft: { label: 'Draft', color: '#94A3B8' },
     submitted: { label: 'Submitted', color: '#3B82F6' },
     won: { label: 'Won', color: '#22C55E' },
@@ -79,12 +79,6 @@ function SortableBundleCard({
                 <span className="bundle-color-swatch" style={{ backgroundColor: bundle.color }} />
                 <span className="bundle-card-name" style={{ flexGrow: 1, pointerEvents: 'none' }}>{bundle.name}</span>
                 <span className="bundle-venue-badge">{bundle.venueNames.length}</span>
-                <span
-                    className="bundle-card-status"
-                    style={{ backgroundColor: PIPELINE_CONFIG[bundle.status || 'draft'].color + '20', color: PIPELINE_CONFIG[bundle.status || 'draft'].color }}
-                >
-                    {PIPELINE_CONFIG[bundle.status || 'draft'].label}
-                </span>
             </div>
             <div className="bundle-card-bottom">
                 <span className="bundle-card-value">{formatCurrency(discountedVal)}</span>
@@ -120,6 +114,9 @@ interface LeftPanelProps {
     onReorderBundles: (newOrderIds: string[]) => void;
     onExportSession: () => void;
     onImportSession: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    statusFilter: Set<QuoteStatus>;
+    onStatusFilterChange: (s: Set<QuoteStatus>) => void;
+    quoteStatuses: Record<string, QuoteStatus>;
 }
 
 export default function LeftPanel({
@@ -132,6 +129,9 @@ export default function LeftPanel({
     onReorderBundles,
     onExportSession,
     onImportSession,
+    statusFilter,
+    onStatusFilterChange,
+    quoteStatuses,
 }: LeftPanelProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -217,22 +217,46 @@ export default function LeftPanel({
                         <span className="kpi-label">Unassigned</span>
                     </div>
                 </div>
-                {/* Pipeline summary */}
-                {bundles.length > 0 && (
-                    <div className="pipeline-summary">
-                        {(Object.keys(PIPELINE_CONFIG) as BundleStatus[]).map(status => {
-                            const statusBundles = bundles.filter(b => (b.status || 'draft') === status);
-                            if (statusBundles.length === 0) return null;
+                <div className="pipeline-summary">
+                    {(Object.keys(PIPELINE_CONFIG) as QuoteStatus[]).map(status => {
+                        const statusCount = venues.filter(v => !v.is_hq && (quoteStatuses[v['Venue name']] || 'draft') === status).length;
+                        if (statusCount === 0) return null;
+                        const cfg = PIPELINE_CONFIG[status];
+                        return (
+                            <div key={status} className="pipeline-item" style={{ borderLeftColor: cfg.color }}>
+                                <span className="pipeline-label" style={{ color: cfg.color }}>{cfg.label}</span>
+                                <span className="pipeline-count">{statusCount}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Status Filter */}
+                <div className="status-filter-section" style={{ marginTop: '16px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase' }}>Filter Map By Status</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {(Object.keys(PIPELINE_CONFIG) as QuoteStatus[]).map(status => {
                             const cfg = PIPELINE_CONFIG[status];
+                            const isSelected = statusFilter.has(status);
                             return (
-                                <div key={status} className="pipeline-item" style={{ borderLeftColor: cfg.color }}>
-                                    <span className="pipeline-label" style={{ color: cfg.color }}>{cfg.label}</span>
-                                    <span className="pipeline-count">{statusBundles.length}</span>
-                                </div>
+                                <label key={status} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', cursor: 'pointer', color: 'var(--text-primary)' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        onChange={(e) => {
+                                            const next = new Set(statusFilter);
+                                            if (e.target.checked) next.add(status);
+                                            else next.delete(status);
+                                            onStatusFilterChange(next);
+                                        }}
+                                        style={{ accentColor: cfg.color, cursor: 'pointer', width: '16px', height: '16px' }}
+                                    />
+                                    {cfg.label}
+                                </label>
                             );
                         })}
                     </div>
-                )}
+                </div>
             </div>
 
             {/* Bundle List */}

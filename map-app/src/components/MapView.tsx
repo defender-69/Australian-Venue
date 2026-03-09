@@ -8,7 +8,7 @@ import 'leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import BundleLegend from './BundleLegend';
-import type { Venue, Bundle } from '../types';
+import type { Venue, Bundle, QuoteStatus } from '../types';
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 
 // HQ icon (red)
@@ -131,6 +131,8 @@ interface MapViewProps {
     removeVenueFromBundle: (venueName: string) => void;
     bulkSelectBundleId: string | null;
     onBulkSelectComplete: () => void;
+    quoteStatuses: Record<string, QuoteStatus>;
+    setQuoteStatus: (venueName: string, status: QuoteStatus) => void;
 }
 
 // ── External bulk-select: custom mouse-event rectangle drawing ──
@@ -241,7 +243,24 @@ function MapBounds({ venues }: { venues: Venue[] }) {
     return null;
 }
 
-export default function MapView({ venues, bundles, getBundleForVenue, addVenueToBundle, removeVenueFromBundle, bulkSelectBundleId, onBulkSelectComplete }: MapViewProps) {
+const STATUS_OPTIONS: { value: QuoteStatus; label: string; color: string }[] = [
+    { value: 'draft', label: 'Draft', color: '#94A3B8' },
+    { value: 'submitted', label: 'Submitted', color: '#3B82F6' },
+    { value: 'won', label: 'Won', color: '#22C55E' },
+    { value: 'lost', label: 'Lost', color: '#EF4444' },
+];
+
+export default function MapView({
+    venues,
+    bundles,
+    getBundleForVenue,
+    addVenueToBundle,
+    removeVenueFromBundle,
+    bulkSelectBundleId,
+    onBulkSelectComplete,
+    quoteStatuses,
+    setQuoteStatus
+}: MapViewProps) {
     const center: [number, number] = [-25.274398, 133.775136];
     const formatCurrency = (v: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(v);
@@ -428,6 +447,20 @@ export default function MapView({ venues, bundles, getBundleForVenue, addVenueTo
                                         <div className="popup-value">
                                             <span className="value-label">Sub Total:</span>
                                             <span className="value-amount">{formatCurrency(venue['Sub Total'])}</span>
+                                        </div>
+
+                                        <div className="popup-value" style={{ marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
+                                            <span className="value-label">Status:</span>
+                                            <select
+                                                value={quoteStatuses[venue['Venue name']] || 'draft'}
+                                                onChange={(e) => setQuoteStatus(venue['Venue name'], e.target.value as QuoteStatus)}
+                                                className="quote-status-select"
+                                                style={{ marginLeft: 'auto', padding: '2px 6px', fontSize: '12px', borderRadius: '4px', border: '1px solid var(--border)' }}
+                                            >
+                                                {STATUS_OPTIONS.map(opt => (
+                                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                ))}
+                                            </select>
                                         </div>
 
                                         {venue['Scope brief'] && (

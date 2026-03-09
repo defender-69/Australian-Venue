@@ -70,7 +70,20 @@ function SortableRow({ id, venue, formatCurrency, onRemoveVenue }: {
             </td>
             <td className="font-medium">{venue['Venue name']}</td>
             <td>{venue['Site address']}</td>
-            <td>{venue['Quote No']}</td>
+            <td>
+                {venue.pdf_filename ? (
+                    <a
+                        href={`${import.meta.env.BASE_URL}quotes/${encodeURIComponent(venue.pdf_filename)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="quote-pdf-link"
+                    >
+                        {venue['Quote No']}
+                    </a>
+                ) : (
+                    venue['Quote No']
+                )}
+            </td>
             <td>{venue['Date']}</td>
             <td className="text-right">{formatCurrency(venue['Sub Total'])}</td>
             <td className="text-center">

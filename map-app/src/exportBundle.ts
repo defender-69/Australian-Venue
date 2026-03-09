@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { PDFDocument } from 'pdf-lib';
 import type { Bundle, Venue } from './types';
 
 // ── CSV Export ──────────────────────────────────────────────
@@ -189,5 +190,39 @@ export async function exportPDF(bundle: Bundle, venues: Venue[]) {
         doc.text(splitNotes, 14, finalY + 16);
     }
 
-    doc.save(`${bundle.name.replace(/[^a-zA-Z0-9]/g, '_')}_bundle.pdf`);
+    // Get the generated cover as an ArrayBuffer
+    const jsPdfBytes = doc.output('arraybuffer');
+
+    // Load into pdf-lib
+    const pdfDoc = await PDFDocument.load(jsPdfBytes);
+
+    // Append each venue's PDF if it exists
+    for (const venue of bundleVenues) {
+        if (venue.pdf_filename) {
+            try {
+                const pdfUrl = `${import.meta.env.BASE_URL}quotes/${encodeURIComponent(venue.pdf_filename)}`;
+                const pdfResponse = await fetch(pdfUrl);
+                if (pdfResponse.ok) {
+                    const venuePdfBytes = await pdfResponse.arrayBuffer();
+                    const venuePdfDoc = await PDFDocument.load(venuePdfBytes);
+                    const copiedPages = await pdfDoc.copyPages(venuePdfDoc, venuePdfDoc.getPageIndices());
+                    copiedPages.forEach((page) => pdfDoc.addPage(page));
+                } else {
+                    console.error(`PDF not found for ${venue['Venue name']}: ${pdfUrl}`);
+                }
+            } catch (e) {
+                console.error(`Failed to append PDF for ${venue['Venue name']}:`, e);
+            }
+        }
+    }
+
+    // Save final merged PDF and download
+    const mergedPdfBytes = await pdfDoc.save();
+    const blob = new Blob([mergedPdfBytes as any], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${bundle.name.replace(/[^a-zA-Z0-9]/g, '_')}_bundle.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
 }

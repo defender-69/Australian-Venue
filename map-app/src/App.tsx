@@ -5,16 +5,11 @@ import BundleView from './components/QuoteBundle';
 import CreateBundleModal from './components/CreateBundleModal';
 import { useBundles } from './useBundles';
 import venuesData from './venues.json';
-import type { Venue, BundleStatus } from './types';
+import type { Venue } from './types';
 
 type ActiveTab = 'map' | string; // 'map' or a bundle id
 
-const STATUS_COLORS: Record<BundleStatus, string> = {
-  draft: '#94A3B8',
-  submitted: '#3B82F6',
-  won: '#22C55E',
-  lost: '#EF4444',
-};
+
 
 function App() {
   const venues: Venue[] = venuesData as Venue[];
@@ -22,6 +17,7 @@ function App() {
   const [selectedState, setSelectedState] = useState<string>('All');
   const [activeTab, setActiveTab] = useState<ActiveTab>('map');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [bulkSelectBundleId, setBulkSelectBundleId] = useState<string | null>(null);
 
   const {
     bundles,
@@ -106,12 +102,6 @@ function App() {
               <span className="tab-bundle-dot" style={{ backgroundColor: bundle.color }} />
               {bundle.name}
               <span className="tab-count">{bundle.venueNames.length}</span>
-              <span
-                className="tab-status-badge"
-                style={{ backgroundColor: STATUS_COLORS[bundle.status || 'draft'] }}
-              >
-                {(bundle.status || 'draft').toUpperCase()}
-              </span>
             </button>
           ))}
 
@@ -141,6 +131,10 @@ function App() {
           onStateChange={setSelectedState}
           onOpenBundleTab={setActiveTab}
           onCreateBundle={() => setShowCreateModal(true)}
+          onBulkSelectFromMap={(bundleId: string) => {
+            setBulkSelectBundleId(bundleId);
+            setActiveTab('map');
+          }}
         />
 
         {/* Right content area */}
@@ -153,6 +147,8 @@ function App() {
               getBundleForVenue={getBundleForVenue}
               addVenueToBundle={addVenueToBundle}
               removeVenueFromBundle={removeVenueFromBundle}
+              bulkSelectBundleId={bulkSelectBundleId}
+              onBulkSelectComplete={() => setBulkSelectBundleId(null)}
             />
           ) : activeBundle ? (
             <BundleView

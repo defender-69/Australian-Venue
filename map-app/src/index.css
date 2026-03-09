@@ -1671,8 +1671,8 @@ body,
   color: var(--accent);
 }
 
-/* ─── Bulk Assign Toolbar (Map selection) ────────────────── */
-.bulk-assign-toolbar {
+/* ─── Bulk Select Banner (Map instruction bar) ──────────── */
+.bulk-select-banner {
   position: absolute;
   top: 12px;
   left: 50%;
@@ -1693,85 +1693,73 @@ body,
   }
 }
 
-.bulk-assign-content {
+.bulk-select-banner-content {
   background: var(--bg-panel);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--accent);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
-  padding: 12px 16px;
+  box-shadow: var(--shadow-lg), 0 0 0 3px rgba(37, 99, 235, .1);
+  padding: 12px 18px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   white-space: nowrap;
-}
-
-.bulk-assign-count {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   font-size: 13px;
   color: var(--text-primary);
 }
 
-.bulk-assign-count strong {
-  color: var(--accent);
-  font-size: 15px;
+.bulk-select-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.bulk-assign-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.bulk-select-text {
+  line-height: 1.4;
 }
 
-.bulk-assign-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
+.bulk-select-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: 4px;
 }
 
-.bulk-assign-select {
-  padding: 6px 10px;
+.bulk-select-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  background: var(--bg-hover);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
+  border-radius: 3px;
   font-family: var(--font);
-  background: var(--bg-panel);
-  color: var(--text-primary);
-  cursor: pointer;
-  outline: none;
-  min-width: 140px;
+  font-size: 10px;
+  font-weight: 600;
 }
 
-.bulk-assign-select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, .1);
-}
-
-.bulk-assign-cancel {
+/* ─── Select from Map Button (Left Panel, per bundle) ──── */
+.bundle-card-select-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--border);
+  gap: 5px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border: 1px dashed var(--border);
   border-radius: var(--radius-sm);
   background: transparent;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font);
   color: var(--text-muted);
-  font-size: 14px;
   cursor: pointer;
-  transition: background .12s, color .12s;
+  transition: all .15s;
+  width: 100%;
+  justify-content: center;
 }
 
-.bulk-assign-cancel:hover {
-  background: #FEF2F2;
-  border-color: #FECACA;
-  color: #DC2626;
-}
-
-/* Hide default leaflet-draw text labels for cleaner UI */
-.leaflet-draw-toolbar a {
-  background-size: 270px 30px !important;
+.bundle-card-select-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
 }
 
 .map-wrapper {

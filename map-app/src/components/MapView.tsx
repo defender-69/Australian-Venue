@@ -130,57 +130,68 @@ interface MapViewProps {
     getBundleForVenue: (venueName: string) => Bundle | null;
     addVenueToBundle: (venueName: string, bundleId: string) => void;
     removeVenueFromBundle: (venueName: string) => void;
+    bulkSelectBundleId: string | null;
+    onBulkSelectComplete: () => void;
 }
 
-// ── Rectangle Select draw control ───────────────────────────
-function RectangleSelectControl({ onSelect }: { onSelect: (bounds: L.LatLngBounds) => void }) {
+// ── External bulk-select: draw rectangle when activated by a bundle ──
+function ExternalRectangleSelect({ active, onComplete }: {
+    active: boolean;
+    onComplete: (bounds: L.LatLngBounds) => void;
+}) {
     const map = useMap();
-    const drawControlRef = useRef<L.Control.Draw | null>(null);
+    const handlerRef = useRef<L.Draw.Rectangle | null>(null);
 
     useEffect(() => {
-        // Add the custom draw control
-        const featureGroup = new L.FeatureGroup();
-        map.addLayer(featureGroup);
+        if (!active) {
+            // Disable if currently active
+            if (handlerRef.current) {
+                handlerRef.current.disable();
+                handlerRef.current = null;
+            }
+            return;
+        }
 
-        const drawControl = new L.Control.Draw({
-            position: 'topright',
-            draw: {
-                rectangle: {
-                    shapeOptions: {
-                        color: '#2563EB',
-                        weight: 2,
-                        fillOpacity: 0.1,
-                    },
-                },
-                polygon: false,
-                circle: false,
-                circlemarker: false,
-                marker: false,
-                polyline: false,
+        // Create and enable rectangle draw handler programmatically (no toolbar)
+        const handler = new L.Draw.Rectangle(map as unknown as L.DrawMap, {
+            shapeOptions: {
+                color: '#2563EB',
+                weight: 2,
+                fillOpacity: 0.12,
+                dashArray: '6 4',
             },
-            edit: { featureGroup, edit: false, remove: false },
         });
+        handler.enable();
+        handlerRef.current = handler;
 
-        map.addControl(drawControl);
-        drawControlRef.current = drawControl;
-
-        // Listen for rectangle creation
         const handleCreated = (e: L.LeafletEvent) => {
             const event = e as L.DrawEvents.Created;
             const layer = event.layer as L.Rectangle;
             const bounds = layer.getBounds();
-            onSelect(bounds);
-            // Don't keep the drawn rectangle on the map
+            onComplete(bounds);
         };
 
         map.on(L.Draw.Event.CREATED, handleCreated);
 
+        // Cancel on Escape
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                handler.disable();
+                handlerRef.current = null;
+                onComplete(null as unknown as L.LatLngBounds); // signal cancel
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+
         return () => {
             map.off(L.Draw.Event.CREATED, handleCreated);
-            map.removeControl(drawControl);
-            map.removeLayer(featureGroup);
+            document.removeEventListener('keydown', handleKeyDown);
+            if (handlerRef.current) {
+                handlerRef.current.disable();
+                handlerRef.current = null;
+            }
         };
-    }, [map, onSelect]);
+    }, [active, map, onComplete]);
 
     return null;
 }
@@ -197,7 +208,7 @@ function MapBounds({ venues }: { venues: Venue[] }) {
     return null;
 }
 
-export default function MapView({ venues, bundles, selectedState, getBundleForVenue, addVenueToBundle, removeVenueFromBundle }: MapViewProps) {
+export default function MapView({ venues, bundles, selectedState, getBundleForVenue, addVenueToBundle, removeVenueFromBundle, bulkSelectBundleId, onBulkSelectComplete }: MapViewProps) {
     const center: [number, number] = [-25.274398, 133.775136];
     const formatCurrency = (v: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(v);
@@ -264,34 +275,33 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
         return createPieClusterIcon(colors, children.length, total);
     }, [venueDataByCoord]);
 
-    // ── Rectangle selection state ──
-    const [selectedVenueNames, setSelectedVenueNames] = useState<string[]>([]);
-    const [showBulkToolbar, setShowBulkToolbar] = useState(false);
+    // Key that changes when bundle assignments change, forcing MarkerClusterGroup to remount
+    const clusterKey = useMemo(() => {
+        const parts: string[] = [];
+        for (const [coord, entries] of venueDataByCoord) {
+            parts.push(`${coord}:${entries.map(e => e.color).join(',')}`);
+        }
+        return parts.join('|');
+    }, [venueDataByCoord]);
 
-    const handleRectangleSelect = useCallback((bounds: L.LatLngBounds) => {
+    // ── External bulk select handler ──
+    const bulkSelectBundle = bundles.find(b => b.id === bulkSelectBundleId);
+
+    const handleBulkDrawComplete = useCallback((bounds: L.LatLngBounds) => {
+        if (!bounds || !bulkSelectBundleId) {
+            // Cancelled (Esc) or no target bundle
+            onBulkSelectComplete();
+            return;
+        }
         const enclosed = regularVenues.filter(v => {
             if (v.lat === null || v.lng === null) return false;
             return bounds.contains(L.latLng(v.lat, v.lng));
         });
-        const names = enclosed.map(v => v['Venue name']);
-        if (names.length > 0) {
-            setSelectedVenueNames(names);
-            setShowBulkToolbar(true);
+        for (const v of enclosed) {
+            addVenueToBundle(v['Venue name'], bulkSelectBundleId);
         }
-    }, [regularVenues]);
-
-    const handleBulkAssign = useCallback((bundleId: string) => {
-        for (const name of selectedVenueNames) {
-            addVenueToBundle(name, bundleId);
-        }
-        setShowBulkToolbar(false);
-        setSelectedVenueNames([]);
-    }, [selectedVenueNames, addVenueToBundle]);
-
-    const cancelBulkSelect = useCallback(() => {
-        setShowBulkToolbar(false);
-        setSelectedVenueNames([]);
-    }, []);
+        onBulkSelectComplete();
+    }, [regularVenues, bulkSelectBundleId, addVenueToBundle, onBulkSelectComplete]);
 
     return (
         <div className="map-wrapper">
@@ -330,8 +340,9 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                     );
                 })}
 
-                {/* Clustered venue markers */}
+                {/* Clustered venue markers — key forces remount when assignments change */}
                 <MarkerClusterGroup
+                    key={clusterKey}
                     showCoverageOnHover={false}
                     maxClusterRadius={50}
                     chunkedLoading
@@ -476,8 +487,11 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                     })}
                 </MarkerClusterGroup>
 
-                {/* Rectangle select draw control */}
-                <RectangleSelectControl onSelect={handleRectangleSelect} />
+                {/* External rectangle select — activated from LeftPanel */}
+                <ExternalRectangleSelect
+                    active={!!bulkSelectBundleId}
+                    onComplete={handleBulkDrawComplete}
+                />
 
                 {/* Bundle legend */}
                 <BundleLegend
@@ -487,35 +501,16 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                 />
             </MapContainer>
 
-            {/* Bulk assign toolbar (floating overlay) */}
-            {showBulkToolbar && (
-                <div className="bulk-assign-toolbar">
-                    <div className="bulk-assign-content">
-                        <div className="bulk-assign-count">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                <circle cx="12" cy="10" r="3" />
-                            </svg>
-                            <strong>{selectedVenueNames.length}</strong> venue{selectedVenueNames.length !== 1 ? 's' : ''} selected
-                        </div>
-                        <div className="bulk-assign-actions">
-                            <label className="bulk-assign-label">Assign to bundle:</label>
-                            <select
-                                className="bulk-assign-select"
-                                defaultValue=""
-                                onChange={e => {
-                                    if (e.target.value) handleBulkAssign(e.target.value);
-                                }}
-                            >
-                                <option value="" disabled>Select a bundle…</option>
-                                {bundles.map(b => (
-                                    <option key={b.id} value={b.id}>{b.name}</option>
-                                ))}
-                            </select>
-                            <button type="button" className="bulk-assign-cancel" onClick={cancelBulkSelect}>
-                                ✕
-                            </button>
-                        </div>
+            {/* Bulk select instruction banner */}
+            {bulkSelectBundle && (
+                <div className="bulk-select-banner">
+                    <div className="bulk-select-banner-content">
+                        <span className="bulk-select-dot" style={{ backgroundColor: bulkSelectBundle.color }} />
+                        <span className="bulk-select-text">
+                            <strong>Bulk Add to “{bulkSelectBundle.name}”</strong>
+                            &nbsp;— Click and drag on the map to draw a rectangle. All venues inside will be added to this bundle.
+                        </span>
+                        <span className="bulk-select-hint">Press <kbd>Esc</kbd> to cancel</span>
                     </div>
                 </div>
             )}

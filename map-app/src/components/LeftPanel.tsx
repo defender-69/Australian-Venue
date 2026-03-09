@@ -30,6 +30,7 @@ interface LeftPanelProps {
     onStateChange: (state: string) => void;
     onOpenBundleTab: (bundleId: string) => void;
     onCreateBundle: () => void;
+    onBulkSelectFromMap: (bundleId: string) => void;
 }
 
 export default function LeftPanel({
@@ -40,6 +41,7 @@ export default function LeftPanel({
     onStateChange,
     onOpenBundleTab,
     onCreateBundle,
+    onBulkSelectFromMap,
 }: LeftPanelProps) {
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(amount);
@@ -171,6 +173,19 @@ export default function LeftPanel({
                                             <span className="bundle-discount-tag">-{bundle.discount}%</span>
                                         )}
                                     </div>
+                                    <button
+                                        className="bundle-card-select-btn"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onBulkSelectFromMap(bundle.id);
+                                        }}
+                                        title="Draw a rectangle on the map to bulk-add venues to this bundle"
+                                    >
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" style={{ strokeDasharray: '4 3' }} />
+                                        </svg>
+                                        Select from Map
+                                    </button>
                                 </button>
                             );
                         })}

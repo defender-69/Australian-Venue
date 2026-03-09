@@ -6,7 +6,10 @@ import type { Bundle, Venue } from './types';
 // ── CSV Export ──────────────────────────────────────────────
 
 export function exportCSV(bundle: Bundle, venues: Venue[]) {
-    const bundleVenues = venues.filter(v => bundle.venueNames.includes(v['Venue name']));
+    // Filter and sort venues match the bundle's drag-and-drop order
+    const bundleVenues = venues
+        .filter(v => bundle.venueNames.includes(v['Venue name']))
+        .sort((a, b) => bundle.venueNames.indexOf(a['Venue name']) - bundle.venueNames.indexOf(b['Venue name']));
     const formatCurr = (n: number) => n.toFixed(2);
 
     const headers = ['Venue Name', 'Site Address', 'Quote No', 'Date', 'Original Value'];
@@ -26,8 +29,8 @@ export function exportCSV(bundle: Bundle, venues: Venue[]) {
     rows.push(['', '', '', 'Total Original:', formatCurr(totalOriginal)]);
     if (bundle.discount > 0) {
         rows.push(['', '', '', `Discount (${bundle.discount}%):`, `-${formatCurr(discountAmt)}`]);
+        rows.push(['', '', '', 'Revised Total:', formatCurr(revisedTotal)]);
     }
-    rows.push(['', '', '', 'Revised Total:', formatCurr(revisedTotal)]);
 
     const csv = [headers.join(','), ...rows.map(r => (r as (string | number)[]).join(','))].join('\n');
 
@@ -43,7 +46,10 @@ export function exportCSV(bundle: Bundle, venues: Venue[]) {
 // ── PDF Export ──────────────────────────────────────────────
 
 export async function exportPDF(bundle: Bundle, venues: Venue[]) {
-    const bundleVenues = venues.filter(v => bundle.venueNames.includes(v['Venue name']));
+    // Filter and sort venues match the bundle's drag-and-drop order
+    const bundleVenues = venues
+        .filter(v => bundle.venueNames.includes(v['Venue name']))
+        .sort((a, b) => bundle.venueNames.indexOf(a['Venue name']) - bundle.venueNames.indexOf(b['Venue name']));
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
     const pageW = doc.internal.pageSize.getWidth();

@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { Bundle, Venue, BundleStatus } from '../types';
 
 const PIPELINE_CONFIG: Record<BundleStatus, { label: string; color: string }> = {
@@ -29,6 +30,8 @@ interface LeftPanelProps {
     onOpenBundleTab: (bundleId: string) => void;
     onCreateBundle: () => void;
     onBulkSelectFromMap: (bundleId: string) => void;
+    onExportSession: () => void;
+    onImportSession: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export default function LeftPanel({
@@ -38,7 +41,11 @@ export default function LeftPanel({
     onOpenBundleTab,
     onCreateBundle,
     onBulkSelectFromMap,
+    onExportSession,
+    onImportSession,
 }: LeftPanelProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(amount);
 
@@ -47,7 +54,7 @@ export default function LeftPanel({
 
     const assignedNames = new Set(bundles.flatMap(b => b.venueNames));
     const assignedCount = assignedNames.size;
-    const unassignedCount = totalQuotes - assignedCount;
+    const unassignedCount = Math.max(0, totalQuotes - assignedCount);
 
     const bundleValue = (bundle: Bundle) =>
         venues
@@ -198,6 +205,43 @@ export default function LeftPanel({
                     </svg>
                     Create New Bundle
                 </button>
+
+                {/* Session Management */}
+                <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                    <button
+                        className="create-bundle-btn"
+                        onClick={onExportSession}
+                        style={{ flex: 1, backgroundColor: 'var(--bg-panel)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+                        title="Save all bundles to a file"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save Session
+                    </button>
+                    <button
+                        className="create-bundle-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{ flex: 1, backgroundColor: 'var(--bg-panel)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+                        title="Load bundles from a file"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Load Session
+                    </button>
+                    <input
+                        type="file"
+                        accept=".json"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={onImportSession}
+                    />
+                </div>
             </div>
         </aside>
     );

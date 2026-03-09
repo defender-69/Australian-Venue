@@ -51,7 +51,8 @@ function createColorIcon(color: string) {
 // Format value as abbreviated currency: $1.2K, $42K, $1.2M
 function formatShortCurrency(value: number): string {
     if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-    if (value >= 1_000) return `$${(value / 1_000).toFixed(value >= 10_000 ? 0 : 1)}K`;
+    if (value >= 100_000) return `$${Math.round(value / 1_000)}K`;
+    if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`;
     return `$${Math.round(value)}`;
 }
 
@@ -271,17 +272,15 @@ export default function MapView({ venues, bundles, getBundleForVenue, addVenueTo
         });
     }, [regularVenues, hiddenBundleIds, getBundleForVenue]);
 
-    // Build coord-keyed lookup for iconCreateFunction (bundle color + value)
-    const venueDataByCoord = useMemo(() => {
-        const map = new Map<string, { color: string; value: number }[]>();
+    // Build lookup for iconCreateFunction (bundle color + value) keyed by Venue Name
+    const venueDataByName = useMemo(() => {
+        const map = new Map<string, { color: string; value: number }>();
         for (const venue of visibleVenues) {
-            if (venue.lat === null || venue.lng === null) continue;
-            const key = `${venue.lat},${venue.lng}`;
             const bundle = getBundleForVenue(venue['Venue name']);
-            const entry = { color: bundle?.color ?? UNASSIGNED_COLOR, value: venue['Sub Total'] || 0 };
-            const existing = map.get(key);
-            if (existing) existing.push(entry);
-            else map.set(key, [entry]);
+            map.set(venue['Venue name'], {
+                color: bundle?.color ?? UNASSIGNED_COLOR,
+                value: venue['Sub Total'] || 0
+            });
         }
         return map;
     }, [visibleVenues, getBundleForVenue]);
@@ -292,29 +291,28 @@ export default function MapView({ venues, bundles, getBundleForVenue, addVenueTo
         const colors: string[] = [];
         let total = 0;
         for (const m of children) {
-            const ll = m.getLatLng();
-            const key = `${ll.lat},${ll.lng}`;
-            const entries = venueDataByCoord.get(key);
-            if (entries) {
-                for (const e of entries) {
-                    colors.push(e.color);
-                    total += e.value;
+            const venueName = m.options.title; // Read back the venue name
+            if (venueName) {
+                const entry = venueDataByName.get(venueName);
+                if (entry) {
+                    colors.push(entry.color);
+                    total += entry.value;
+                    continue;
                 }
-            } else {
-                colors.push(UNASSIGNED_COLOR);
             }
+            colors.push(UNASSIGNED_COLOR);
         }
         return createPieClusterIcon(colors, children.length, total);
-    }, [venueDataByCoord]);
+    }, [venueDataByName]);
 
     // Key that changes when bundle assignments change, forcing MarkerClusterGroup to remount
     const clusterKey = useMemo(() => {
         const parts: string[] = [];
-        for (const [coord, entries] of venueDataByCoord) {
-            parts.push(`${coord}:${entries.map(e => e.color).join(',')}`);
+        for (const [name, entry] of venueDataByName) {
+            parts.push(`${name}:${entry.color}`);
         }
         return parts.join('|');
-    }, [venueDataByCoord]);
+    }, [venueDataByName]);
 
     // ── External bulk select handler ──
     const bulkSelectBundle = bundles.find(b => b.id === bulkSelectBundleId);
@@ -393,6 +391,7 @@ export default function MapView({ venues, bundles, getBundleForVenue, addVenueTo
                                 position={[venue.lat, venue.lng]}
                                 icon={icon}
                                 zIndexOffset={bundle ? 500 : 0}
+                                title={venue['Venue name']} // Used by iconCreateFunction lookup
                             >
                                 <Tooltip
                                     permanent

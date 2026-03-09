@@ -49,6 +49,10 @@ export function useBundles() {
         setBundles(prev => prev.map(b => b.id === id ? { ...b, name } : b));
     }, []);
 
+    const loadBundles = useCallback((newBundles: Bundle[]) => {
+        setBundles(newBundles);
+    }, []);
+
     const setDiscount = useCallback((id: string, discount: number) => {
         setBundles(prev => prev.map(b => b.id === id ? { ...b, discount } : b));
     }, []);
@@ -110,6 +114,7 @@ export function useBundles() {
         createBundle,
         deleteBundle,
         renameBundle,
+        loadBundles,
         setDiscount,
         addVenueToBundle,
         removeVenueFromBundle,

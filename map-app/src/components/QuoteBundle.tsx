@@ -110,10 +110,10 @@ export default function BundleView({
     onStatusChange,
     onReorderVenues,
 }: BundleViewProps) {
-    const bundleVenues = useMemo(() =>
-        venues.filter(v => bundle.venueNames.includes(v['Venue name'])),
-        [venues, bundle.venueNames]
-    );
+    const bundleVenues = useMemo(() => {
+        const filtered = venues.filter(v => bundle.venueNames.includes(v['Venue name']));
+        return filtered.sort((a, b) => bundle.venueNames.indexOf(a['Venue name']) - bundle.venueNames.indexOf(b['Venue name']));
+    }, [venues, bundle.venueNames]);
 
     const originalTotal = useMemo(() =>
         bundleVenues.reduce((sum, v) => sum + (v['Sub Total'] || 0), 0),

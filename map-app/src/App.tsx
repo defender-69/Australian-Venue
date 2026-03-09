@@ -5,13 +5,25 @@ import BundleView from './components/QuoteBundle';
 import CreateBundleModal from './components/CreateBundleModal';
 import { useBundles } from './useBundles';
 import venuesData from './venues.json';
-import type { Venue, Bundle } from './types';
+import type { Venue, Bundle, DateFilterPreset } from './types';
 import { Toaster, toast } from 'react-hot-toast';
 import type { QuoteStatus } from './types';
 
+function parseDate(dateStr: string | undefined | null): Date | null {
+  if (!dateStr) return null;
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    // DD/MM/YYYY
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    const date = new Date(year, month, day);
+    if (!isNaN(date.getTime())) return date;
+  }
+  return null;
+}
+
 type ActiveTab = 'map' | string; // 'map' or a bundle id
-
-
 
 function App() {
   const venues: Venue[] = venuesData as Venue[];
@@ -20,6 +32,8 @@ function App() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [bulkSelectBundleId, setBulkSelectBundleId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<Set<QuoteStatus>>(new Set(['draft', 'submitted', 'won', 'lost']));
+  const [dateFilterType, setDateFilterType] = useState<DateFilterPreset>('all');
+  const [customDateRange, setCustomDateRange] = useState<{ from: string, to: string }>({ from: '', to: '' });
 
   const {
     bundles,
@@ -41,8 +55,56 @@ function App() {
   } = useBundles();
 
   const filteredVenues = useMemo(() => {
-    return venues.filter(v => statusFilter.has(getQuoteStatus(v['Venue name'])));
-  }, [venues, statusFilter, getQuoteStatus]);
+    let result = venues.filter(v => statusFilter.has(getQuoteStatus(v['Venue name'])));
+
+    if (dateFilterType !== 'all') {
+      const now = new Date();
+      // Use start of day for accurate full-day comparisons
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      result = result.filter(v => {
+        const d = parseDate(v['Date']);
+        if (!d) return false;
+
+        const dTime = d.getTime();
+
+        if (dateFilterType === 'last7days') {
+          const sevenDaysAgo = new Date(today);
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          return dTime >= sevenDaysAgo.getTime();
+        } else if (dateFilterType === 'last30days') {
+          const thirtyDaysAgo = new Date(today);
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          return dTime >= thirtyDaysAgo.getTime();
+        } else if (dateFilterType === 'thisMonth') {
+          return d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth();
+        } else if (dateFilterType === 'lastMonth') {
+          const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          return d.getFullYear() === lastMonth.getFullYear() && d.getMonth() === lastMonth.getMonth();
+        } else if (dateFilterType === 'thisYear') {
+          return d.getFullYear() === today.getFullYear();
+        } else if (dateFilterType === 'custom') {
+          const fromStr = customDateRange.from;
+          const toStr = customDateRange.to;
+          let pass = true;
+          if (fromStr) {
+            const fromDate = new Date(fromStr);
+            // Ignore timezone offsets by using parts or just comparing dates directly. Custom input is YYYY-MM-DD.
+            // When standard Date parses YYYY-MM-DD it will default to UTC.
+            if (!isNaN(fromDate.getTime()) && dTime < fromDate.getTime()) pass = false;
+          }
+          if (toStr) {
+            const toDate = new Date(toStr);
+            if (!isNaN(toDate.getTime()) && dTime > toDate.getTime()) pass = false;
+          }
+          return pass;
+        }
+        return true;
+      });
+    }
+
+    return result;
+  }, [venues, statusFilter, getQuoteStatus, dateFilterType, customDateRange]);
 
   const handleCreateBundle = (name: string, color: string) => {
     const id = createBundle(name, color);
@@ -131,6 +193,10 @@ function App() {
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
           quoteStatuses={quoteStatuses}
+          dateFilterType={dateFilterType}
+          onDateFilterTypeChange={setDateFilterType}
+          customDateRange={customDateRange}
+          onCustomDateRangeChange={setCustomDateRange}
         />
         {/* Right content area */}
         <main className="main-content-area">

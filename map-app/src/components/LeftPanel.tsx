@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import type { Bundle, Venue, QuoteStatus } from '../types';
+import type { Bundle, Venue, QuoteStatus, DateFilterPreset } from '../types';
 import {
     DndContext,
     closestCenter,
@@ -117,6 +117,10 @@ interface LeftPanelProps {
     statusFilter: Set<QuoteStatus>;
     onStatusFilterChange: (s: Set<QuoteStatus>) => void;
     quoteStatuses: Record<string, QuoteStatus>;
+    dateFilterType: DateFilterPreset;
+    onDateFilterTypeChange: (type: DateFilterPreset) => void;
+    customDateRange: { from: string; to: string };
+    onCustomDateRangeChange: (range: { from: string; to: string }) => void;
 }
 
 export default function LeftPanel({
@@ -132,6 +136,10 @@ export default function LeftPanel({
     statusFilter,
     onStatusFilterChange,
     quoteStatuses,
+    dateFilterType,
+    onDateFilterTypeChange,
+    customDateRange,
+    onCustomDateRangeChange,
 }: LeftPanelProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -256,6 +264,71 @@ export default function LeftPanel({
                             );
                         })}
                     </div>
+                </div>
+
+                {/* Date Filter */}
+                <div className="date-filter-section" style={{ marginTop: '16px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase' }}>Filter Map By Date</div>
+                    <select
+                        value={dateFilterType}
+                        onChange={(e) => onDateFilterTypeChange(e.target.value as DateFilterPreset)}
+                        style={{
+                            width: '100%',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            border: '1px solid var(--border)',
+                            backgroundColor: 'var(--bg-panel)',
+                            color: 'var(--text-primary)',
+                            fontSize: '13px',
+                            marginBottom: dateFilterType === 'custom' ? '8px' : '0'
+                        }}
+                    >
+                        <option value="all">All Time</option>
+                        <option value="last7days">Last 7 Days</option>
+                        <option value="last30days">Last 30 Days</option>
+                        <option value="thisMonth">This Month</option>
+                        <option value="lastMonth">Last Month</option>
+                        <option value="thisYear">This Year</option>
+                        <option value="custom">Custom Range...</option>
+                    </select>
+                    {dateFilterType === 'custom' && (
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>From</label>
+                                <input
+                                    type="date"
+                                    value={customDateRange.from}
+                                    onChange={(e) => onCustomDateRangeChange({ ...customDateRange, from: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        borderRadius: '4px',
+                                        border: '1px solid var(--border)',
+                                        backgroundColor: 'var(--bg-panel)',
+                                        color: 'var(--text-primary)',
+                                        fontSize: '13px'
+                                    }}
+                                />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' }}>To</label>
+                                <input
+                                    type="date"
+                                    value={customDateRange.to}
+                                    onChange={(e) => onCustomDateRangeChange({ ...customDateRange, to: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: '6px',
+                                        borderRadius: '4px',
+                                        border: '1px solid var(--border)',
+                                        backgroundColor: 'var(--bg-panel)',
+                                        color: 'var(--text-primary)',
+                                        fontSize: '13px'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

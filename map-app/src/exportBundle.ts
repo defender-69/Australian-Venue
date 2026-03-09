@@ -109,23 +109,7 @@ export async function exportPDF(bundle: Bundle, venues: Venue[]) {
     doc.setTextColor(30, 30, 30);
     doc.text(`Bundle: ${bundle.name}`, 14, titleY);
 
-    // Status badge
-    const statusColors: Record<string, [number, number, number]> = {
-        draft: [148, 163, 184],
-        submitted: [59, 130, 246],
-        won: [34, 197, 94],
-        lost: [239, 68, 68],
-    };
-    const statusColor = statusColors[(bundle.status || 'draft')] || statusColors.draft;
-    doc.setFillColor(...statusColor);
-    const statusText = (bundle.status || 'draft').toUpperCase();
-    const statusW = doc.getTextWidth(statusText) + 8;
-    const statusX = 14 + doc.getTextWidth(`Bundle: ${bundle.name}`) + 6;
-    doc.roundedRect(statusX, titleY - 4, statusW, 6, 3, 3, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(255, 255, 255);
-    doc.text(statusText, statusX + 4, titleY - 0.5);
+    // Status badge removed based on requirement to not include status in export
 
     // Date
     doc.setFont('helvetica', 'normal');

@@ -14,6 +14,8 @@ export interface Venue {
 
 export type QuoteStatus = 'draft' | 'submitted' | 'won' | 'lost';
 
+export type DateFilterPreset = 'all' | 'last7days' | 'last30days' | 'thisMonth' | 'lastMonth' | 'thisYear' | 'custom';
+
 export interface Bundle {
     id: string;
     name: string;

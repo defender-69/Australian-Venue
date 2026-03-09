@@ -1409,3 +1409,371 @@ body,
   border-radius: 20px;
   flex-shrink: 0;
 }
+
+/* ─── Tab Status Badge ───────────────────────────────────── */
+.tab-status-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  padding: 2px 6px;
+  border-radius: 20px;
+  color: white;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ─── Status Pipeline Selector ───────────────────────────── */
+.bundle-status-selector {
+  display: flex;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+
+.status-pill:hover {
+  background: var(--bg-hover);
+}
+
+.status-pill.active {
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+}
+
+.status-pill-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* Status badge inline (in header bar) */
+.status-badge-inline {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: .3px;
+}
+
+/* ─── Notes Section ──────────────────────────────────────── */
+.bundle-notes-section {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.notes-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  padding: 4px 0;
+  transition: color .15s;
+}
+
+.notes-toggle-btn:hover {
+  color: var(--text-primary);
+}
+
+.notes-indicator {
+  color: var(--accent);
+  font-size: 8px;
+  margin-left: 2px;
+}
+
+.bundle-notes-textarea {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text-primary);
+  background: #FFFDF5;
+  resize: vertical;
+  min-height: 60px;
+  outline: none;
+  line-height: 1.5;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.bundle-notes-textarea::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.bundle-notes-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .08);
+}
+
+/* ─── Pipeline Summary (Left Panel) ─────────────────────── */
+.pipeline-summary {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.pipeline-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-left: 3px solid;
+  background: var(--bg-surface);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 11px;
+}
+
+.pipeline-label {
+  font-weight: 600;
+}
+
+.pipeline-count {
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  padding: 0 5px;
+  border-radius: 20px;
+  font-size: 10px;
+}
+
+/* Bundle card status badge */
+.bundle-card-status {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  letter-spacing: .3px;
+}
+
+/* ─── Export Button & Dropdown ───────────────────────────── */
+.export-bundle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  font-family: var(--font);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, border-color .15s, color .15s;
+  flex-shrink: 0;
+}
+
+.export-bundle-btn:hover {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  z-index: 50;
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.export-dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s;
+}
+
+.export-dropdown-menu button:hover {
+  background: var(--bg-hover);
+}
+
+.export-dropdown-menu button:not(:last-child) {
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* ─── Drag Handle ────────────────────────────────────────── */
+.drag-handle-cell {
+  width: 36px;
+  text-align: center;
+  padding: 0 !important;
+}
+
+.drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: grab;
+  border-radius: 4px;
+  transition: background .12s, color .12s;
+  touch-action: none;
+}
+
+.drag-handle:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+/* ─── Bulk Assign Toolbar (Map selection) ────────────────── */
+.bulk-assign-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  animation: slideDown .2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.bulk-assign-content {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+.bulk-assign-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.bulk-assign-count strong {
+  color: var(--accent);
+  font-size: 15px;
+}
+
+.bulk-assign-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-assign-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.bulk-assign-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+}
+
+.bulk-assign-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, .1);
+}
+
+.bulk-assign-cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+
+.bulk-assign-cancel:hover {
+  background: #FEF2F2;
+  border-color: #FECACA;
+  color: #DC2626;
+}
+
+/* Hide default leaflet-draw text labels for cleaner UI */
+.leaflet-draw-toolbar a {
+  background-size: 270px 30px !important;
+}
+
+.map-wrapper {
+  position: relative;
+}

@@ -12,10 +12,14 @@ export interface Venue {
     "pdf_filename"?: string;
 }
 
+export type BundleStatus = 'draft' | 'submitted' | 'won' | 'lost';
+
 export interface Bundle {
     id: string;
     name: string;
     color: string;      // hex from 12-colour palette
     discount: number;   // 0–100 %
     venueNames: string[]; // exclusive — each venue belongs to at most one bundle
+    notes: string;       // freeform estimator notes
+    status: BundleStatus; // pipeline status
 }

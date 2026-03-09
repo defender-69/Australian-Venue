@@ -4,11 +4,13 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet-draw';
+import 'leaflet-draw/dist/leaflet.draw.css';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import StateBoundary from './StateBoundary';
 import BundleLegend from './BundleLegend';
 import type { Venue, Bundle } from '../types';
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 
 // HQ icon (red)
 const hqIcon = new L.Icon({
@@ -130,6 +132,59 @@ interface MapViewProps {
     removeVenueFromBundle: (venueName: string) => void;
 }
 
+// ── Rectangle Select draw control ───────────────────────────
+function RectangleSelectControl({ onSelect }: { onSelect: (bounds: L.LatLngBounds) => void }) {
+    const map = useMap();
+    const drawControlRef = useRef<L.Control.Draw | null>(null);
+
+    useEffect(() => {
+        // Add the custom draw control
+        const featureGroup = new L.FeatureGroup();
+        map.addLayer(featureGroup);
+
+        const drawControl = new L.Control.Draw({
+            position: 'topright',
+            draw: {
+                rectangle: {
+                    shapeOptions: {
+                        color: '#2563EB',
+                        weight: 2,
+                        fillOpacity: 0.1,
+                    },
+                },
+                polygon: false,
+                circle: false,
+                circlemarker: false,
+                marker: false,
+                polyline: false,
+            },
+            edit: { featureGroup, edit: false, remove: false },
+        });
+
+        map.addControl(drawControl);
+        drawControlRef.current = drawControl;
+
+        // Listen for rectangle creation
+        const handleCreated = (e: L.LeafletEvent) => {
+            const event = e as L.DrawEvents.Created;
+            const layer = event.layer as L.Rectangle;
+            const bounds = layer.getBounds();
+            onSelect(bounds);
+            // Don't keep the drawn rectangle on the map
+        };
+
+        map.on(L.Draw.Event.CREATED, handleCreated);
+
+        return () => {
+            map.off(L.Draw.Event.CREATED, handleCreated);
+            map.removeControl(drawControl);
+            map.removeLayer(featureGroup);
+        };
+    }, [map, onSelect]);
+
+    return null;
+}
+
 function MapBounds({ venues }: { venues: Venue[] }) {
     const map = useMap();
     useEffect(() => {
@@ -208,6 +263,35 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
         }
         return createPieClusterIcon(colors, children.length, total);
     }, [venueDataByCoord]);
+
+    // ── Rectangle selection state ──
+    const [selectedVenueNames, setSelectedVenueNames] = useState<string[]>([]);
+    const [showBulkToolbar, setShowBulkToolbar] = useState(false);
+
+    const handleRectangleSelect = useCallback((bounds: L.LatLngBounds) => {
+        const enclosed = regularVenues.filter(v => {
+            if (v.lat === null || v.lng === null) return false;
+            return bounds.contains(L.latLng(v.lat, v.lng));
+        });
+        const names = enclosed.map(v => v['Venue name']);
+        if (names.length > 0) {
+            setSelectedVenueNames(names);
+            setShowBulkToolbar(true);
+        }
+    }, [regularVenues]);
+
+    const handleBulkAssign = useCallback((bundleId: string) => {
+        for (const name of selectedVenueNames) {
+            addVenueToBundle(name, bundleId);
+        }
+        setShowBulkToolbar(false);
+        setSelectedVenueNames([]);
+    }, [selectedVenueNames, addVenueToBundle]);
+
+    const cancelBulkSelect = useCallback(() => {
+        setShowBulkToolbar(false);
+        setSelectedVenueNames([]);
+    }, []);
 
     return (
         <div className="map-wrapper">
@@ -392,6 +476,9 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                     })}
                 </MarkerClusterGroup>
 
+                {/* Rectangle select draw control */}
+                <RectangleSelectControl onSelect={handleRectangleSelect} />
+
                 {/* Bundle legend */}
                 <BundleLegend
                     bundles={bundles}
@@ -399,6 +486,39 @@ export default function MapView({ venues, bundles, selectedState, getBundleForVe
                     onToggle={handleToggle}
                 />
             </MapContainer>
+
+            {/* Bulk assign toolbar (floating overlay) */}
+            {showBulkToolbar && (
+                <div className="bulk-assign-toolbar">
+                    <div className="bulk-assign-content">
+                        <div className="bulk-assign-count">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            <strong>{selectedVenueNames.length}</strong> venue{selectedVenueNames.length !== 1 ? 's' : ''} selected
+                        </div>
+                        <div className="bulk-assign-actions">
+                            <label className="bulk-assign-label">Assign to bundle:</label>
+                            <select
+                                className="bulk-assign-select"
+                                defaultValue=""
+                                onChange={e => {
+                                    if (e.target.value) handleBulkAssign(e.target.value);
+                                }}
+                            >
+                                <option value="" disabled>Select a bundle…</option>
+                                {bundles.map(b => (
+                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                ))}
+                            </select>
+                            <button type="button" className="bulk-assign-cancel" onClick={cancelBulkSelect}>
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

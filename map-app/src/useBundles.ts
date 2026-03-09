@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Bundle } from './types';
+import type { Bundle, BundleStatus } from './types';
 
 const STORAGE_KEY = 'venue-bundles';
 
@@ -29,6 +29,8 @@ export function useBundles() {
             color,
             discount: 0,
             venueNames: [],
+            notes: '',
+            status: 'draft',
         };
         setBundles(prev => [...prev, newBundle]);
         return newBundle.id;
@@ -68,6 +70,21 @@ export function useBundles() {
         })));
     }, []);
 
+    // Set notes for a bundle
+    const setBundleNotes = useCallback((id: string, notes: string) => {
+        setBundles(prev => prev.map(b => b.id === id ? { ...b, notes } : b));
+    }, []);
+
+    // Set pipeline status for a bundle
+    const setBundleStatus = useCallback((id: string, status: BundleStatus) => {
+        setBundles(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+    }, []);
+
+    // Reorder venues within a bundle
+    const reorderVenuesInBundle = useCallback((id: string, venueNames: string[]) => {
+        setBundles(prev => prev.map(b => b.id === id ? { ...b, venueNames } : b));
+    }, []);
+
     // Get the bundle a venue belongs to (or null if unassigned)
     const getBundleForVenue = useCallback((venueName: string): Bundle | null => {
         return bundles.find(b => b.venueNames.includes(venueName)) ?? null;
@@ -81,6 +98,9 @@ export function useBundles() {
         setDiscount,
         addVenueToBundle,
         removeVenueFromBundle,
+        setBundleNotes,
+        setBundleStatus,
+        reorderVenuesInBundle,
         getBundleForVenue,
     };
 }

@@ -1,5 +1,29 @@
-import { useMemo, useState } from 'react';
-import type { Venue, Bundle } from '../types';
+import { useMemo, useState, useRef } from 'react';
+import type { Venue, Bundle, BundleStatus } from '../types';
+import { exportCSV, exportPDF } from '../exportBundle';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+    useSortable,
+    arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const STATUS_CONFIG: Record<BundleStatus, { label: string; color: string; icon: string }> = {
+    draft: { label: 'Draft', color: '#94A3B8', icon: '✎' },
+    submitted: { label: 'Submitted', color: '#3B82F6', icon: '→' },
+    won: { label: 'Won', color: '#22C55E', icon: '✓' },
+    lost: { label: 'Lost', color: '#EF4444', icon: '✗' },
+};
 
 interface BundleViewProps {
     bundle: Bundle;
@@ -8,6 +32,57 @@ interface BundleViewProps {
     onRemoveVenue: (venueName: string) => void;
     onDeleteBundle: (bundleId: string) => void;
     onRenameBundle: (bundleId: string, name: string) => void;
+    onNotesChange: (bundleId: string, notes: string) => void;
+    onStatusChange: (bundleId: string, status: BundleStatus) => void;
+    onReorderVenues: (bundleId: string, venueNames: string[]) => void;
+}
+
+// ── Sortable Row Component ──
+function SortableRow({ id, venue, formatCurrency, onRemoveVenue }: {
+    id: string;
+    venue: Venue;
+    formatCurrency: (v: number) => string;
+    onRemoveVenue: (name: string) => void;
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        background: isDragging ? 'var(--bg-hover)' : undefined,
+    };
+
+    return (
+        <tr ref={setNodeRef} style={style}>
+            <td className="drag-handle-cell">
+                <button type="button" className="drag-handle" {...attributes} {...listeners}>
+                    ⠿
+                </button>
+            </td>
+            <td className="font-medium">{venue['Venue name']}</td>
+            <td>{venue['Site address']}</td>
+            <td>{venue['Quote No']}</td>
+            <td>{venue['Date']}</td>
+            <td className="text-right">{formatCurrency(venue['Sub Total'])}</td>
+            <td className="text-center">
+                <button
+                    className="remove-btn"
+                    onClick={() => onRemoveVenue(venue['Venue name'])}
+                    title="Remove from bundle"
+                >
+                    ×
+                </button>
+            </td>
+        </tr>
+    );
 }
 
 export default function BundleView({
@@ -17,6 +92,9 @@ export default function BundleView({
     onRemoveVenue,
     onDeleteBundle,
     onRenameBundle,
+    onNotesChange,
+    onStatusChange,
+    onReorderVenues,
 }: BundleViewProps) {
     const bundleVenues = useMemo(() =>
         venues.filter(v => bundle.venueNames.includes(v['Venue name'])),
@@ -35,6 +113,29 @@ export default function BundleView({
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(value);
 
     const [showConfirm, setShowConfirm] = useState(false);
+    const [notesExpanded, setNotesExpanded] = useState(!!(bundle.notes));
+    const [showExportMenu, setShowExportMenu] = useState(false);
+    const notesRef = useRef<HTMLTextAreaElement>(null);
+
+    // Status helpers
+    const currentStatus = bundle.status || 'draft';
+    const statusCfg = STATUS_CONFIG[currentStatus];
+
+    // Drag & drop sensors and handler
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor),
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            const oldIndex = bundle.venueNames.indexOf(active.id as string);
+            const newIndex = bundle.venueNames.indexOf(over.id as string);
+            const newOrder = arrayMove(bundle.venueNames, oldIndex, newIndex);
+            onReorderVenues(bundle.id, newOrder);
+        }
+    };
 
     const handleDeleteClick = (e?: React.MouseEvent) => {
         if (e) {
@@ -68,13 +169,82 @@ export default function BundleView({
         );
     };
 
+    // ── Status Selector ──
+    const renderStatusSelector = () => (
+        <div className="bundle-status-selector">
+            {(Object.keys(STATUS_CONFIG) as BundleStatus[]).map(s => {
+                const cfg = STATUS_CONFIG[s];
+                const isActive = currentStatus === s;
+                return (
+                    <button
+                        key={s}
+                        type="button"
+                        className={`status-pill ${isActive ? 'active' : ''}`}
+                        style={{
+                            '--status-color': cfg.color,
+                            backgroundColor: isActive ? cfg.color + '20' : 'transparent',
+                            borderColor: isActive ? cfg.color : 'var(--border)',
+                            color: isActive ? cfg.color : 'var(--text-secondary)',
+                        } as React.CSSProperties}
+                        onClick={() => onStatusChange(bundle.id, s)}
+                    >
+                        <span className="status-pill-icon">{cfg.icon}</span>
+                        {cfg.label}
+                    </button>
+                );
+            })}
+        </div>
+    );
+
+    // ── Notes Section ──
+    const renderNotesSection = () => (
+        <div className="bundle-notes-section">
+            <button
+                type="button"
+                className="notes-toggle-btn"
+                onClick={() => setNotesExpanded(!notesExpanded)}
+            >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transform: notesExpanded ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+                Notes
+                {bundle.notes && !notesExpanded && (
+                    <span className="notes-indicator">●</span>
+                )}
+            </button>
+            {notesExpanded && (
+                <textarea
+                    ref={notesRef}
+                    className="bundle-notes-textarea"
+                    value={bundle.notes || ''}
+                    onChange={e => onNotesChange(bundle.id, e.target.value)}
+                    placeholder="Add estimator notes… e.g. &quot;Client wants this done by Q3&quot;"
+                    rows={3}
+                />
+            )}
+        </div>
+    );
+
+    // ── Empty state ──
     if (bundleVenues.length === 0) {
         return (
             <div className="bundle-empty">
                 <div className="bundle-empty-banner" style={{ borderColor: bundle.color, backgroundColor: bundle.color + '18' }}>
                     <span className="bundle-color-indicator" style={{ backgroundColor: bundle.color }} />
                     <h2>{bundle.name}</h2>
+                    <span className="status-badge-inline" style={{ backgroundColor: statusCfg.color + '20', color: statusCfg.color }}>
+                        {statusCfg.icon} {statusCfg.label}
+                    </span>
                 </div>
+                {renderStatusSelector()}
+                {renderNotesSection()}
                 <div className="bundle-empty-body">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}>
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -88,6 +258,7 @@ export default function BundleView({
         );
     }
 
+    // ── Main view ──
     return (
         <div className="bundle-container">
             {/* Bundle header bar */}
@@ -102,6 +273,9 @@ export default function BundleView({
                         aria-label="Bundle name"
                     />
                     <span className="bundle-venue-count">{bundleVenues.length} sites</span>
+                    <span className="status-badge-inline" style={{ backgroundColor: statusCfg.color + '20', color: statusCfg.color }}>
+                        {statusCfg.icon} {statusCfg.label}
+                    </span>
                 </div>
                 <button type="button" className="delete-bundle-btn" onClick={handleDeleteClick} title="Delete bundle">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -112,43 +286,88 @@ export default function BundleView({
                     </svg>
                     Delete Bundle
                 </button>
+                {/* Export dropdown */}
+                <div className="export-dropdown-wrapper" style={{ position: 'relative' }}>
+                    <button
+                        type="button"
+                        className="export-bundle-btn"
+                        onClick={() => setShowExportMenu(!showExportMenu)}
+                        title="Export bundle"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Export
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </button>
+                    {showExportMenu && (
+                        <div className="export-dropdown-menu">
+                            <button type="button" onClick={() => { exportCSV(bundle, venues); setShowExportMenu(false); }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                                Export as CSV
+                            </button>
+                            <button type="button" onClick={() => { exportPDF(bundle, venues); setShowExportMenu(false); }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                </svg>
+                                Export as PDF
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* Status selector */}
+            {renderStatusSelector()}
 
             <div className="bundle-content">
                 {/* Venue table */}
                 <div className="bundle-table-container">
-                    <table className="bundle-table">
-                        <thead>
-                            <tr>
-                                <th>Venue Name</th>
-                                <th>Address</th>
-                                <th>Quote No</th>
-                                <th>Date</th>
-                                <th className="text-right">Original Value</th>
-                                <th>Remove</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bundleVenues.map(venue => (
-                                <tr key={venue['Venue name']}>
-                                    <td className="font-medium">{venue['Venue name']}</td>
-                                    <td>{venue['Site address']}</td>
-                                    <td>{venue['Quote No']}</td>
-                                    <td>{venue['Date']}</td>
-                                    <td className="text-right">{formatCurrency(venue['Sub Total'])}</td>
-                                    <td className="text-center">
-                                        <button
-                                            className="remove-btn"
-                                            onClick={() => onRemoveVenue(venue['Venue name'])}
-                                            title="Remove from bundle"
-                                        >
-                                            ×
-                                        </button>
-                                    </td>
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <table className="bundle-table">
+                            <thead>
+                                <tr>
+                                    <th style={{ width: 36 }}></th>
+                                    <th>Venue Name</th>
+                                    <th>Address</th>
+                                    <th>Quote No</th>
+                                    <th>Date</th>
+                                    <th className="text-right">Original Value</th>
+                                    <th>Remove</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <SortableContext
+                                    items={bundle.venueNames}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    {bundleVenues.map(venue => (
+                                        <SortableRow
+                                            key={venue['Venue name']}
+                                            id={venue['Venue name']}
+                                            venue={venue}
+                                            formatCurrency={formatCurrency}
+                                            onRemoveVenue={onRemoveVenue}
+                                        />
+                                    ))}
+                                </SortableContext>
+                            </tbody>
+                        </table>
+                    </DndContext>
                 </div>
 
                 {/* Summary panel */}
@@ -189,6 +408,9 @@ export default function BundleView({
                         </span>
                     </div>
                 </div>
+
+                {/* Notes section */}
+                {renderNotesSection()}
             </div>
             {renderConfirmModal()}
         </div>

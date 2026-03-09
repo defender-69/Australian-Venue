@@ -1,4 +1,11 @@
-import type { Bundle, Venue } from '../types';
+import type { Bundle, Venue, BundleStatus } from '../types';
+
+const PIPELINE_CONFIG: Record<BundleStatus, { label: string; color: string }> = {
+    draft: { label: 'Draft', color: '#94A3B8' },
+    submitted: { label: 'Submitted', color: '#3B82F6' },
+    won: { label: 'Won', color: '#22C55E' },
+    lost: { label: 'Lost', color: '#EF4444' },
+};
 
 export const BUNDLE_COLORS = [
     '#E74C3C', // Red
@@ -84,6 +91,22 @@ export default function LeftPanel({
                         <span className="kpi-label">Unassigned</span>
                     </div>
                 </div>
+                {/* Pipeline summary */}
+                {bundles.length > 0 && (
+                    <div className="pipeline-summary">
+                        {(Object.keys(PIPELINE_CONFIG) as BundleStatus[]).map(status => {
+                            const statusBundles = bundles.filter(b => (b.status || 'draft') === status);
+                            if (statusBundles.length === 0) return null;
+                            const cfg = PIPELINE_CONFIG[status];
+                            return (
+                                <div key={status} className="pipeline-item" style={{ borderLeftColor: cfg.color }}>
+                                    <span className="pipeline-label" style={{ color: cfg.color }}>{cfg.label}</span>
+                                    <span className="pipeline-count">{statusBundles.length}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             {/* State Filter */}
@@ -135,6 +158,12 @@ export default function LeftPanel({
                                         />
                                         <span className="bundle-card-name">{bundle.name}</span>
                                         <span className="bundle-venue-badge">{bundle.venueNames.length}</span>
+                                        <span
+                                            className="bundle-card-status"
+                                            style={{ backgroundColor: PIPELINE_CONFIG[bundle.status || 'draft'].color + '20', color: PIPELINE_CONFIG[bundle.status || 'draft'].color }}
+                                        >
+                                            {PIPELINE_CONFIG[bundle.status || 'draft'].label}
+                                        </span>
                                     </div>
                                     <div className="bundle-card-bottom">
                                         <span className="bundle-card-value">{formatCurrency(discountedVal)}</span>

@@ -2074,3 +2074,168 @@ body,
   color: var(--text-secondary);
   font-weight: 500;
 }
+
+/* ─── Interactive Data Grid ──────────────────────────────── */
+.table-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 400px;
+}
+
+.dash-table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: white;
+  margin-top: 12px;
+}
+
+.dash-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.dash-table th {
+  padding: 12px 16px;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--border-light);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.dash-table th:hover {
+  background: var(--border-light);
+}
+
+.dash-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  margin-top: 12px;
+}
+
+.dash-table-header h3 {
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.dash-table-filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.dash-filter-input,
+.dash-filter-select {
+  width: auto;
+  min-width: 120px;
+  max-width: 160px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: white;
+  font-size: 11px;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.dash-filter-input:focus,
+.dash-filter-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.dash-filter-select {
+  cursor: pointer;
+}
+
+.dash-filter-reset {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dash-filter-reset:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+}
+
+.dash-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.dash-table tr:hover td {
+  background: var(--bg-hover);
+}
+
+.dash-td-main {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dash-status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.dash-bundle-btn {
+  background: white;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dash-bundle-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.dash-unassigned {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.dash-quote-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.dash-quote-link:hover {
+  color: var(--accent-light);
+  text-decoration: underline;
+}

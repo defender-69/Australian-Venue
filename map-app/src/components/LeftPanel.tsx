@@ -68,14 +68,27 @@ function SortableBundleCard({
         <div
             ref={setNodeRef}
             style={style}
-            {...attributes}
-            {...listeners}
             className="bundle-list-card"
             onClick={() => onOpenBundleTab(bundle.id)}
             role="button"
             tabIndex={0}
         >
             <div className="bundle-card-top">
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="bundle-drag-handle"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="12" r="1.5" />
+                        <circle cx="9" cy="5" r="1.5" />
+                        <circle cx="9" cy="19" r="1.5" />
+                        <circle cx="15" cy="12" r="1.5" />
+                        <circle cx="15" cy="5" r="1.5" />
+                        <circle cx="15" cy="19" r="1.5" />
+                    </svg>
+                </div>
                 <span className="bundle-color-swatch" style={{ backgroundColor: bundle.color }} />
                 <span className="bundle-card-name" style={{ flexGrow: 1, pointerEvents: 'none' }}>{bundle.name}</span>
                 <span className="bundle-venue-badge">{bundle.venueNames.length}</span>

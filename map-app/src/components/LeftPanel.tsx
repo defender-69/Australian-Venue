@@ -134,6 +134,8 @@ interface LeftPanelProps {
     onDateFilterTypeChange: (type: DateFilterPreset) => void;
     customDateRange: { from: string; to: string };
     onCustomDateRangeChange: (range: { from: string; to: string }) => void;
+    isDashboardOpen: boolean;
+    onToggleDashboard: () => void;
 }
 
 export default function LeftPanel({
@@ -153,6 +155,8 @@ export default function LeftPanel({
     onDateFilterTypeChange,
     customDateRange,
     onCustomDateRangeChange,
+    isDashboardOpen,
+    onToggleDashboard,
 }: LeftPanelProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -174,13 +178,6 @@ export default function LeftPanel({
     const formatCurrency = (amount: number) =>
         new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD' }).format(amount);
 
-    const totalQuotes = venues.filter(v => !v.is_hq).length;
-    const totalValue = venues.filter(v => !v.is_hq).reduce((s, v) => s + (v['Sub Total'] || 0), 0);
-
-    const assignedNames = new Set(bundles.flatMap(b => b.venueNames));
-    const assignedCount = assignedNames.size;
-    const unassignedCount = Math.max(0, totalQuotes - assignedCount);
-
     const bundleValue = (bundle: Bundle) =>
         venues
             .filter(v => bundle.venueNames.includes(v['Venue name']))
@@ -200,43 +197,45 @@ export default function LeftPanel({
 
             {/* KPI Dashboard */}
             <div className="kpi-section">
-                <button
-                    className="create-bundle-btn"
-                    onClick={() => onOpenBundleTab('map')}
-                    style={{
-                        marginBottom: '16px',
-                        marginTop: 0,
-                        borderStyle: 'solid',
-                        background: activeTab === 'map' ? 'var(--accent-light)' : 'var(--bg-surface)',
-                        color: activeTab === 'map' ? 'var(--accent)' : 'var(--text-primary)',
-                        borderColor: activeTab === 'map' ? 'var(--accent)' : 'var(--border)',
-                    }}
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-                        <line x1="8" y1="2" x2="8" y2="18" />
-                        <line x1="16" y1="6" x2="16" y2="22" />
-                    </svg>
-                    Map View
-                </button>
-
-                <div className="kpi-grid">
-                    <div className="kpi-card" style={{ gridColumn: 'span 1' }}>
-                        <span className="kpi-value">{totalQuotes}</span>
-                        <span className="kpi-label">Total Quotes</span>
-                    </div>
-                    <div className="kpi-card kpi-highlight" style={{ gridColumn: 'span 1' }}>
-                        <span className="kpi-value">{formatCurrency(totalValue)}</span>
-                        <span className="kpi-label">Portfolio Value</span>
-                    </div>
-                    <div className="kpi-card kpi-assigned">
-                        <span className="kpi-value">{assignedCount}</span>
-                        <span className="kpi-label">In Bundles</span>
-                    </div>
-                    <div className="kpi-card kpi-unassigned">
-                        <span className="kpi-value">{unassignedCount}</span>
-                        <span className="kpi-label">Unassigned</span>
-                    </div>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                    <button
+                        className="create-bundle-btn"
+                        onClick={() => onOpenBundleTab('map')}
+                        style={{
+                            flex: 1,
+                            margin: 0,
+                            borderStyle: 'solid',
+                            background: activeTab === 'map' ? 'var(--accent-light)' : 'var(--bg-surface)',
+                            color: activeTab === 'map' ? 'var(--accent)' : 'var(--text-primary)',
+                            borderColor: activeTab === 'map' ? 'var(--accent)' : 'var(--border)',
+                        }}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                            <line x1="8" y1="2" x2="8" y2="18" />
+                            <line x1="16" y1="6" x2="16" y2="22" />
+                        </svg>
+                        Map View
+                    </button>
+                    <button
+                        className="create-bundle-btn"
+                        onClick={onToggleDashboard}
+                        style={{
+                            flex: 1,
+                            margin: 0,
+                            borderStyle: 'solid',
+                            background: isDashboardOpen ? 'var(--accent-light)' : 'var(--bg-surface)',
+                            color: isDashboardOpen ? 'var(--accent)' : 'var(--text-primary)',
+                            borderColor: isDashboardOpen ? 'var(--accent)' : 'var(--border)',
+                        }}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <line x1="9" y1="3" x2="9" y2="21" />
+                            <line x1="15" y1="3" x2="15" y2="21" />
+                        </svg>
+                        Show Dashboard
+                    </button>
                 </div>
                 <div className="pipeline-summary">
                     {(Object.keys(PIPELINE_CONFIG) as QuoteStatus[]).map(status => {

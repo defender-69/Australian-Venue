@@ -3,6 +3,7 @@ import LeftPanel from './components/LeftPanel';
 import MapView from './components/MapView';
 import BundleView from './components/QuoteBundle';
 import CreateBundleModal from './components/CreateBundleModal';
+import Dashboard from './components/Dashboard';
 import { useBundles } from './useBundles';
 import venuesData from './venues.json';
 import type { Venue, Bundle, DateFilterPreset } from './types';
@@ -31,6 +32,7 @@ function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('map');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [bulkSelectBundleId, setBulkSelectBundleId] = useState<string | null>(null);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<Set<QuoteStatus>>(new Set(['draft', 'submitted', 'won', 'lost']));
   const [dateFilterType, setDateFilterType] = useState<DateFilterPreset>('all');
   const [customDateRange, setCustomDateRange] = useState<{ from: string, to: string }>({ from: '', to: '' });
@@ -197,6 +199,8 @@ function App() {
           onDateFilterTypeChange={setDateFilterType}
           customDateRange={customDateRange}
           onCustomDateRangeChange={setCustomDateRange}
+          isDashboardOpen={isDashboardOpen}
+          onToggleDashboard={() => setIsDashboardOpen(!isDashboardOpen)}
         />
         {/* Right content area */}
         <main className="main-content-area">
@@ -227,6 +231,19 @@ function App() {
               bulkSetQuoteStatus={bulkSetQuoteStatus}
             />
           ) : null}
+
+          {isDashboardOpen && (
+            <Dashboard
+              venues={filteredVenues}
+              bundles={bundles}
+              quoteStatuses={quoteStatuses}
+              onClose={() => setIsDashboardOpen(false)}
+              onSelectBundle={(bundleId) => {
+                setActiveTab(bundleId);
+                setIsDashboardOpen(false);
+              }}
+            />
+          )}
         </main>
       </div>
 

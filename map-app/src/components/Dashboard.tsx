@@ -275,32 +275,32 @@ export default function Dashboard({ venues, bundles, quoteStatuses, onClose, onS
 
             <div className="dashboard-content">
                 {/* 1. KPIs */}
-                <div className="dashboard-section kpi-hero">
-                    <div className="hero-stat main">
-                        <span className="hero-label">Total Pipeline Value</span>
-                        <span className="hero-value">{formatCurrency(totalValue)}</span>
+                <div className="dashboard-section dashboard-kpis">
+                    <div className="dash-kpi-card highlight">
+                        <span className="dash-kpi-label">Total Pipeline</span>
+                        <span className="dash-kpi-value">{formatCurrency(totalValue)}</span>
                     </div>
-                    <div className="hero-secondary">
-                        <div className="hero-stat">
-                            <span className="hero-label">Total Quotes</span>
-                            <span className="hero-value">{totalQuotes}</span>
-                        </div>
-                        <div className="hero-stat">
-                            <span className="hero-label">Win Rate</span>
-                            <span className="hero-value">{winRate.toFixed(1)}%</span>
-                        </div>
-                        <div className="hero-stat">
-                            <span className="hero-label">Avg. Quote</span>
-                            <span className="hero-value">{formatCurrency(averageValue)}</span>
-                        </div>
-                        <div className="hero-stat">
-                            <span className="hero-label">Bundled</span>
-                            <span className="hero-value">{assignmentRate.toFixed(1)}%</span>
-                        </div>
-                        <div className="hero-stat" style={{ color: totalDiscountImpact > 0 ? '#FECACA' : 'inherit' }}>
-                            <span className="hero-label">Total Discounts</span>
-                            <span className="hero-value">-{formatCurrency(totalDiscountImpact)}</span>
-                        </div>
+                    <div className="dash-kpi-card">
+                        <span className="dash-kpi-label">Total Quotes</span>
+                        <span className="dash-kpi-value">{totalQuotes}</span>
+                    </div>
+                    <div className="dash-kpi-card">
+                        <span className="dash-kpi-label">Win Rate</span>
+                        <span className="dash-kpi-value">{winRate.toFixed(1)}%</span>
+                    </div>
+                    <div className="dash-kpi-card">
+                        <span className="dash-kpi-label">Avg. Quote</span>
+                        <span className="dash-kpi-value">{formatCurrency(averageValue)}</span>
+                    </div>
+                    <div className="dash-kpi-card">
+                        <span className="dash-kpi-label">Bundled</span>
+                        <span className="dash-kpi-value">{assignmentRate.toFixed(1)}%</span>
+                    </div>
+                    <div className="dash-kpi-card">
+                        <span className="dash-kpi-label">Discounts</span>
+                        <span className="dash-kpi-value" style={{ color: totalDiscountImpact > 0 ? '#EF4444' : 'inherit' }}>
+                            -{formatCurrency(totalDiscountImpact)}
+                        </span>
                     </div>
                 </div>
 

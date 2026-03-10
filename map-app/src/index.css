@@ -1907,50 +1907,58 @@ body,
   letter-spacing: 0.5px;
 }
 
-/* KPIs in Dashboard */
-.kpi-hero {
+.dashboard-kpis {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dash-kpi-card {
+  flex: 1;
+  min-width: 140px;
+  background: white;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dash-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.dash-kpi-card.highlight {
   background: linear-gradient(135deg, var(--accent) 0%, #1e40af 100%);
   color: white;
   border: none;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
-.hero-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hero-stat.main {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 16px;
-}
-
-.hero-label {
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 0.8;
+.dash-kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.hero-stat.main .hero-value {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -1px;
+.dash-kpi-card.highlight .dash-kpi-label {
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.hero-secondary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.hero-secondary .hero-value {
-  font-size: 18px;
+.dash-kpi-value {
+  font-size: 24px;
   font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+
+.dash-kpi-card.highlight .dash-kpi-value {
+  color: white;
 }
 
 /* Charts Tooltip */
